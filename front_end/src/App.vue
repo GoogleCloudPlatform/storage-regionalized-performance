@@ -51,9 +51,9 @@ export default {
   margin-right: 15px auto;
   overflow: auto;
   min-height: 150px;
-  border: 1px solid rgb(224, 224, 224);
+  border: 1px solid rgb(214, 214, 214);
   padding: 30px;
-  border-radius: 15px;
+  border-radius: 10px;
   background-color: whitesmoke;
 }
 nav {

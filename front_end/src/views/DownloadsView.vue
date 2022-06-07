@@ -31,7 +31,7 @@ export default {
     async reloadDownloads(fileSize = "2mib") {
       currentFileSize = fileSize.toString();
 
-      //reset the progress bar
+      //reset progress bar
       progressBarCount = 0;
       this.progressBarWidth = progressBarCount.toString() + "%";
 
@@ -50,7 +50,7 @@ export default {
               : 0;
           });
 
-          //Incrementing the progress bar with each new benchmark result
+          //Updating progress bar
           let aux = new Object(regions_json);
           let increment_size = 100 * (1 / Object.keys(aux).length);
           progressBarCount += increment_size;
