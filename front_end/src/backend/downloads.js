@@ -144,8 +144,6 @@ async function benchmarkDownloads(fileName, log) {
     return JSON.stringify(allBucketsResults);
 }
 
-// 1)  @TODO: Move 'export' declaration to function signature directly. Right now that breaks, why?
-// 3)  @TODO: Have all external uses of a function in this file reflect camelCase instead of snake_case.
 exports.benchmarkDownloads = benchmarkDownloads;
 exports.benchmarkDownload = benchmarkDownload;
 exports.REGIONS_MAP = REGIONS_MAP;
