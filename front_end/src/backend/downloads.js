@@ -1,5 +1,5 @@
-// In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
-const raw_data = `{
+// In these functions the 'fileName' parameter letiables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
+const rawData = `{
     "northamerica-northeast1":"Montréal",
     "northamerica-northeast2":"Toronto",
     "us-central1":"Iowa",
@@ -35,7 +35,7 @@ const raw_data = `{
     "australia-southeast1":"Sydney",
     "australia-southeast2":"Melbourne"
 }`;
-let regions_json = JSON.parse(raw_data);
+let regionsJSON = JSON.parse(rawData);
 
 
 async function timed_download(fileName, bucket) {
@@ -47,9 +47,7 @@ async function timed_download(fileName, bucket) {
 
     const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-    // HTTP Request with Axios
     async function downloadFile() {
-        // console.log(URL);
         const start = Date.now();
         await axios.get(URL)
         const end = Date.now() - start;
@@ -60,13 +58,13 @@ async function timed_download(fileName, bucket) {
     return timeTaken / 1000; // return in units of seconds
 }
 
-async function benchmark_single_download(fileName, bucketName, regions_json) {
-    var result = new Map();
+async function benchmark_single_download(fileName, bucketName, regionsJSON) {
+    let result = new Map();
     const timeTaken = await timed_download(fileName, bucketName);
 
     // Add one for throughput or bytes/second
-    var fileSizeBytes = 0;
-    var fileSizeMiB = 0;
+    let fileSizeBytes = 0;
+    let fileSizeMiB = 0;
     if (fileName == '2mib.txt') {
         fileSizeBytes = 2097152;
         fileSizeMiB = 2;
@@ -81,7 +79,7 @@ async function benchmark_single_download(fileName, bucketName, regions_json) {
     const speedMiBps = fileSizeMiB / timeTaken;
 
     result.set('bucketName', bucketName);
-    result.set('location', regions_json[bucketName]);
+    result.set('location', regionsJSON[bucketName]);
     result.set('fileName', fileName);
     result.set('timeTaken', timeTaken);
     result.set('fileSizeBytes', fileSizeBytes.toString());
@@ -96,9 +94,9 @@ async function benchmark_all_downloads(fileName) {
     console.log(`Beginning Benchmarking for ${fileName}`);
 
 
-    var bucketResults = new Array()
-    for (var bucketName in regions_json) {
-        const result = await benchmark_single_download(fileName, bucketName, regions_json);
+    let bucketResults = new Array()
+    for (let bucketName in regionsJSON) {
+        const result = await benchmark_single_download(fileName, bucketName, regionsJSON);
         bucketResults.push(Object.fromEntries(result))
 
         console.log(`Completed Downloads Benchmark for ${bucketName}`);
@@ -108,7 +106,7 @@ async function benchmark_all_downloads(fileName) {
 }
 
 async function benchmark_download(fileName, bucketName, log) {
-    const result = await benchmark_single_download(fileName, bucketName, regions_json);
+    const result = await benchmark_single_download(fileName, bucketName, regionsJSON);
 
     console.log(`Completed Downloads Benchmark for ${bucketName}`);
 
@@ -116,7 +114,7 @@ async function benchmark_download(fileName, bucketName, log) {
         console.log(result)
     }
 
-    var arr = new Array()
+    let arr = new Array()
     arr.push(Object.fromEntries(result))
     return JSON.stringify(arr);
 }
@@ -131,7 +129,6 @@ async function benchmark_downloads(fileName, log) {
     return JSON.stringify(allBucketsResults);
 }
 
-exports.timed_download = timed_download;
 exports.benchmark_downloads = benchmark_downloads;
 exports.benchmark_download = benchmark_download;
-exports.regions_json = regions_json;
+exports.regions_json = regionsJSON;

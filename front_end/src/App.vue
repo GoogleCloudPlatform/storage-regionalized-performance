@@ -34,8 +34,6 @@ export default {
 };
 </script>
 
-
-
 <style>
 #app {
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
