@@ -30,9 +30,9 @@ import ResultsTable from "@/components/ResultsTable";
 import ProgressBar from "../components/ProgressBar";
 const downloads = require("@/backend/downloads");
 
-var currentFileSize = "2mib";
-let regions_json = downloads.regions_json;
-var progressBarCount = 0;
+let currentFileSize = "2mib";
+const REGIONS_MAP = downloads.REGIONS_MAP;
+let progressBarCount = 0;
 
 export default {
   name: "DownloadsView",
@@ -54,22 +54,23 @@ export default {
       this.results = [];
       const fileName = currentFileSize + ".txt";
 
-      for (var bucketName in regions_json) {
+      for (let bucketName in REGIONS_MAP) {
         try {
-          var result = await downloads.benchmark_download(fileName, bucketName);
+          let result = await downloads.benchmarkDownload(fileName, bucketName);
           this.results = this.results.concat(JSON.parse(result));
           this.results = this.results.sort((a, b) => {
-            return a.timeTaken < b.timeTaken
-              ? -1
-              : a.timeTaken > b.timeTaken
-              ? 1
-              : 0;
+            if (a.timeTaken < b.timeTaken) {
+              return -1;
+            } else if (a.timeTaken > b.timeTaken) {
+              return 1;
+            }
+            return 0;
           });
 
           //Updating progress bar
-          let aux = new Object(regions_json);
-          let increment_size = 100 * (1 / Object.keys(aux).length);
-          progressBarCount += increment_size;
+          let aux = new Object(REGIONS_MAP);
+          let incrementSize = 100 * (1 / Object.keys(aux).length);
+          progressBarCount += incrementSize;
           this.progressBarWidth = progressBarCount.toString() + "%";
 
           console.log("Downloads Success! ^_^");

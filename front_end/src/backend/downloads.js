@@ -15,7 +15,7 @@
  */
 
 // In these functions the 'fileName' parameter letiables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
-const rawData = `{
+const REGIONS_JSON_STRING = `{
     "northamerica-northeast1":"Montréal",
     "northamerica-northeast2":"Toronto",
     "us-central1":"Iowa",
@@ -51,10 +51,10 @@ const rawData = `{
     "australia-southeast1":"Sydney",
     "australia-southeast2":"Melbourne"
 }`;
-let regionsJSON = JSON.parse(rawData);
+const REGIONS_MAP = JSON.parse(REGIONS_JSON_STRING);
 
 
-async function timed_download(fileName, bucket) {
+async function timeDownload(fileName, bucket) {
     const axios = require('axios');
     const bucketName = 'gcsrbpa-' + bucket;
 
@@ -74,11 +74,10 @@ async function timed_download(fileName, bucket) {
     return timeTaken / 1000; // return in units of seconds
 }
 
-async function benchmark_single_download(fileName, bucketName, regionsJSON) {
+async function benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP) {
     let result = new Map();
-    const timeTaken = await timed_download(fileName, bucketName);
+    const timeTaken = await timeDownload(fileName, bucketName);
 
-    // Add one for throughput or bytes/second
     let fileSizeBytes = 0;
     let fileSizeMiB = 0;
     if (fileName == '2mib.txt') {
@@ -95,7 +94,7 @@ async function benchmark_single_download(fileName, bucketName, regionsJSON) {
     const speedMiBps = fileSizeMiB / timeTaken;
 
     result.set('bucketName', bucketName);
-    result.set('location', regionsJSON[bucketName]);
+    result.set('location', REGIONS_MAP[bucketName]);
     result.set('fileName', fileName);
     result.set('timeTaken', timeTaken);
     result.set('fileSizeBytes', fileSizeBytes.toString());
@@ -106,13 +105,13 @@ async function benchmark_single_download(fileName, bucketName, regionsJSON) {
 }
 
 // a function that cycles through all buckets and returns all the times in a HashMap
-async function benchmark_all_downloads(fileName) {
+async function benchmarkAllDownloads(fileName) {
     console.log(`Beginning Benchmarking for ${fileName}`);
 
 
     let bucketResults = new Array()
-    for (let bucketName in regionsJSON) {
-        const result = await benchmark_single_download(fileName, bucketName, regionsJSON);
+    for (let bucketName in REGIONS_MAP) {
+        const result = await benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP);
         bucketResults.push(Object.fromEntries(result))
 
         console.log(`Completed Downloads Benchmark for ${bucketName}`);
@@ -121,8 +120,8 @@ async function benchmark_all_downloads(fileName) {
     return bucketResults;
 }
 
-async function benchmark_download(fileName, bucketName, log) {
-    const result = await benchmark_single_download(fileName, bucketName, regionsJSON);
+async function benchmarkDownload(fileName, bucketName, log) {
+    const result = await benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP);
 
     console.log(`Completed Downloads Benchmark for ${bucketName}`);
 
@@ -135,8 +134,8 @@ async function benchmark_download(fileName, bucketName, log) {
     return JSON.stringify(arr);
 }
 
-async function benchmark_downloads(fileName, log) {
-    const allBucketsResults = await benchmark_all_downloads(fileName);
+async function benchmarkDownloads(fileName, log) {
+    const allBucketsResults = await benchmarkAllDownloads(fileName);
 
     if (log == 'log') {
         console.log(allBucketsResults);
@@ -145,6 +144,8 @@ async function benchmark_downloads(fileName, log) {
     return JSON.stringify(allBucketsResults);
 }
 
-exports.benchmark_downloads = benchmark_downloads;
-exports.benchmark_download = benchmark_download;
-exports.regions_json = regionsJSON;
+// 1)  @TODO: Move 'export' declaration to function signature directly. Right now that breaks, why?
+// 3)  @TODO: Have all external uses of a function in this file reflect camelCase instead of snake_case.
+exports.benchmarkDownloads = benchmarkDownloads;
+exports.benchmarkDownload = benchmarkDownload;
+exports.REGIONS_MAP = REGIONS_MAP;
