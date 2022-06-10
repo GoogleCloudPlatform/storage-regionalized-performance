@@ -15,7 +15,7 @@
  */
 
 // In these functions the 'fileName' parameter letiables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
-const REGIONS_JSON_STRING = `{
+export const REGIONS_MAP = {
     "northamerica-northeast1":"Montréal",
     "northamerica-northeast2":"Toronto",
     "us-central1":"Iowa",
@@ -50,8 +50,7 @@ const REGIONS_JSON_STRING = `{
     "asia-southeast2":"Jakarta",
     "australia-southeast1":"Sydney",
     "australia-southeast2":"Melbourne"
-}`;
-export const REGIONS_MAP = JSON.parse(REGIONS_JSON_STRING);
+};
 
 
 async function timeDownload(fileName, bucket) {
