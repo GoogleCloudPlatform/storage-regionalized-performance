@@ -57,9 +57,6 @@ async function timeDownload(fileName, bucket) {
     const axios = require('axios');
     const bucketName = 'gcsrbpa-' + bucket;
 
-    // Build the URL - example: https://storage.googleapis.com/gcsrbpa-asia-southeast2/256mib.txt
-    // `https://storage.googleapis.com/${bucketName}/${fileName}`
-
     const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
     async function downloadFile() {
@@ -73,7 +70,7 @@ async function timeDownload(fileName, bucket) {
     return timeTaken / 1000; // return in units of seconds
 }
 
-async function benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP) {
+async function benchmarkSingleDownload(fileName, bucketName) {
     let result = new Map();
     const timeTaken = await timeDownload(fileName, bucketName);
 
@@ -103,42 +100,12 @@ async function benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP) {
     return result;
 }
 
-// a function that cycles through all buckets and returns all the times in a HashMap
-async function benchmarkAllDownloads(fileName) {
-    console.log(`Beginning Benchmarking for ${fileName}`);
-
-
-    let bucketResults = new Array()
-    for (let bucketName in REGIONS_MAP) {
-        const result = await benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP);
-        bucketResults.push(Object.fromEntries(result))
-
-        console.log(`Completed Downloads Benchmark for ${bucketName}`);
-    }
-
-    return bucketResults;
-}
-
-export async function benchmarkDownload(fileName, bucketName, log) {
+export async function benchmarkDownload(fileName, bucketName) {
     const result = await benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP);
 
     console.log(`Completed Downloads Benchmark for ${bucketName}`);
 
-    if (log == 'log') {
-        console.log(result)
-    }
-
     let arr = new Array()
     arr.push(Object.fromEntries(result))
     return JSON.stringify(arr);
-}
-
-export async function benchmarkDownloads(fileName, log) {
-    const allBucketsResults = await benchmarkAllDownloads(fileName);
-
-    if (log == 'log') {
-        console.log(allBucketsResults);
-    }
-
-    return JSON.stringify(allBucketsResults);
 }
