@@ -51,7 +51,7 @@ const REGIONS_JSON_STRING = `{
     "australia-southeast1":"Sydney",
     "australia-southeast2":"Melbourne"
 }`;
-const REGIONS_MAP = JSON.parse(REGIONS_JSON_STRING);
+export const REGIONS_MAP = JSON.parse(REGIONS_JSON_STRING);
 
 
 async function timeDownload(fileName, bucket) {
@@ -120,7 +120,7 @@ async function benchmarkAllDownloads(fileName) {
     return bucketResults;
 }
 
-async function benchmarkDownload(fileName, bucketName, log) {
+export async function benchmarkDownload(fileName, bucketName, log) {
     const result = await benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP);
 
     console.log(`Completed Downloads Benchmark for ${bucketName}`);
@@ -134,7 +134,7 @@ async function benchmarkDownload(fileName, bucketName, log) {
     return JSON.stringify(arr);
 }
 
-async function benchmarkDownloads(fileName, log) {
+export async function benchmarkDownloads(fileName, log) {
     const allBucketsResults = await benchmarkAllDownloads(fileName);
 
     if (log == 'log') {
@@ -143,7 +143,3 @@ async function benchmarkDownloads(fileName, log) {
 
     return JSON.stringify(allBucketsResults);
 }
-
-exports.benchmarkDownloads = benchmarkDownloads;
-exports.benchmarkDownload = benchmarkDownload;
-exports.REGIONS_MAP = REGIONS_MAP;
