@@ -15,10 +15,10 @@
 -->
 
 <template>
-  <div>
-    <button class="btn" @click="reloadDownloads('2mib')">2MiB</button>
-    <button class="btn" @click="reloadDownloads('64mib')">64MiB</button>
-    <button class="btn" @click="reloadDownloads('256mib')">256MiB</button>
+  <div> 
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.small)">2MiB</button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.medium)">64MiB</button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.large)">256MiB</button>
     <ProgressBar :progressWidth="progressBarWidth" />
     <ResultsTable :results="results" ref="resultsTable" />
   </div>
@@ -29,9 +29,9 @@
 import ResultsTable from "@/components/ResultsTable";
 import ProgressBar from "../components/ProgressBar";
 const downloads = require("@/backend/downloads");
+import {REGIONS_MAP, FILESIZES_NAMES} from "@/backend/common";
 
-let currentFileSize = "2mib";
-const REGIONS_MAP = downloads.REGIONS_MAP;
+let currentFileSize = FILESIZES_NAMES.small;
 let progressBarCount = 0;
 
 export default {
@@ -41,18 +41,18 @@ export default {
       results: [],
       currentFileSize: currentFileSize,
       progressBarWidth: "0%",
+      FILESIZES_NAMES: FILESIZES_NAMES
     };
   },
   methods: {
-    async reloadDownloads(fileSize = "2mib") {
+    async reloadDownloads(fileSize = FILESIZES_NAMES.small) {
       currentFileSize = fileSize.toString();
-
       //reset progress bar
       progressBarCount = 0;
       this.progressBarWidth = progressBarCount.toString() + "%";
 
       this.results = [];
-      const fileName = currentFileSize + ".txt";
+      const fileName = currentFileSize;
 
       for (let bucketName in REGIONS_MAP) {
         try {
@@ -67,10 +67,8 @@ export default {
             return 0;
           });
 
-          //Updating progress bar
-          let aux = new Object(REGIONS_MAP);
-          let incrementSize = 100 * (1 / Object.keys(aux).length);
-          progressBarCount += incrementSize;
+          //Updating progress bar 
+          progressBarCount = 100 * (this.results.length / Object.keys(REGIONS_MAP).length);
           this.progressBarWidth = progressBarCount.toString() + "%";
 
           console.log("Downloads Success! ^_^");
