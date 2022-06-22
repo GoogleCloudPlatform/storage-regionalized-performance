@@ -15,10 +15,10 @@
  */
 
 // In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
-import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from "./common";
+import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from "./common.js";
 
 import axios from "axios";
-async function downloadFile(URL) {
+export async function downloadFile(URL) {
     try {
         const start = Date.now();
         await axios.get(URL);
@@ -29,7 +29,7 @@ async function downloadFile(URL) {
     }
 }
 
-async function timeDownload(fileName, bucket) {
+export async function timeDownload(fileName, bucket) {
     const bucketName = 'gcsrbpa-' + bucket;
 
     const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
@@ -38,7 +38,7 @@ async function timeDownload(fileName, bucket) {
     return timeTaken / 1000; // return in units of seconds
 }
 
-async function benchmarkSingleDownload(fileName, bucketName) {
+export async function benchmarkSingleDownload(fileName, bucketName) {
     let result = new Map();
     const timeTaken = await timeDownload(fileName, bucketName);
 
