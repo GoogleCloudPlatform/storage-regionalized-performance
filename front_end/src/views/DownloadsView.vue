@@ -28,7 +28,8 @@
 <script>
 import ResultsTable from "@/components/ResultsTable";
 import ProgressBar from "../components/ProgressBar";
-const downloads = require("@/backend/downloads");
+// const downloads = require("@/backend/downloads");
+import {Downloads} from "@/backend/downloads"
 import {REGIONS_MAP, FILESIZES_NAMES} from "@/backend/common";
 
 let currentFileSize = FILESIZES_NAMES.small;
@@ -54,6 +55,7 @@ export default {
       this.results = [];
       const fileName = currentFileSize;
 
+      let downloads = new Downloads();
       for (let bucketName in REGIONS_MAP) {
         try {
           let result = await downloads.benchmarkDownload(fileName, bucketName);

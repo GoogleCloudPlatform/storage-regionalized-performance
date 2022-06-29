@@ -16,55 +16,70 @@
 
 // In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
 import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from "./common.js";
-
 import axios from "axios";
-export async function downloadFile(URL) {
-    try {
-        const start = Date.now();
-        await axios.get(URL);
-        const end = Date.now() - start;
-        return end;
-    } catch (e) {
-        return -1;
+
+export class Downloads {
+    async downloadFile(URL) {
+        try {
+
+            const start = Date.now();
+            await axios.get(URL);
+            const end = Date.now() - start;
+            return end;
+        } catch (e) {
+            return -1;
+        }
     }
-}
 
-export async function timeDownload(fileName, bucket) {
-    const bucketName = 'gcsrbpa-' + bucket;
 
-    const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+    async timeDownload(fileName, bucket) {
+        if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
+            throw new Error("Invalid File Name");
+        }
+        if (!(bucket in REGIONS_MAP)) {
+            throw new Error("Invalid Bucket Name");
+        }
 
-    const timeTaken = await downloadFile(URL);
-    return timeTaken / 1000; // return in units of seconds
-}
+        const bucketName = 'gcsrbpa-' + bucket;
 
-export async function benchmarkSingleDownload(fileName, bucketName) {
-    let result = new Map();
-    const timeTaken = await timeDownload(fileName, bucketName);
+        const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-    let fileSizeBytes = FILESIZE_BYTES[fileName];
-    let fileSizeMiB = FILESIZE_MIB[fileName];
+        const timeTaken = await this.downloadFile(URL);
+        return timeTaken / 1000; // return in units of seconds
+    }
 
-    const speedBps = fileSizeBytes / timeTaken;
-    const speedMiBps = fileSizeMiB / timeTaken;
+    async benchmarkSingleDownload(fileName, bucketName) {
+        let result = new Map();
+        const timeTaken = await this.timeDownload(fileName, bucketName);
 
-    result.set('bucketName', bucketName);
-    result.set('location', REGIONS_MAP[bucketName]);
-    result.set('fileName', fileName);
-    result.set('timeTaken', timeTaken);
-    result.set('fileSizeBytes', fileSizeBytes.toString());
-    result.set('speedBps', speedBps.toFixed(3));
-    result.set('speedMiBps', speedMiBps.toFixed(3));
 
-    return result;
-}
 
-export async function benchmarkDownload(fileName, bucketName) {
-    const result = await benchmarkSingleDownload(fileName, bucketName);
+        let fileSizeBytes = FILESIZE_BYTES[fileName];
+        let fileSizeMiB = FILESIZE_MIB[fileName];
+        let location = REGIONS_MAP[bucketName];
 
-    console.log(`Completed Downloads Benchmark for ${bucketName}`);
+        const speedBps = fileSizeBytes / timeTaken;
+        const speedMiBps = fileSizeMiB / timeTaken;
 
-    let arr = new Array();
-    arr.push(Object.fromEntries(result));
-    return JSON.stringify(arr);
+        result.set('bucketName', bucketName);
+        result.set('location', location);
+        result.set('fileName', fileName);
+        result.set('timeTaken', timeTaken);
+        result.set('fileSizeBytes', fileSizeBytes);
+        result.set('speedBps', speedBps.toFixed(3));
+        result.set('speedMiBps', speedMiBps.toFixed(3));
+
+        return result;
+    }
+
+    async benchmarkDownload(fileName, bucketName) {
+        const result = await this.benchmarkSingleDownload(fileName, bucketName);
+
+        console.log(`Completed Downloads Benchmark for ${bucketName}`);
+
+        let arr = new Array();
+        arr.push(Object.fromEntries(result));
+        return JSON.stringify(arr);
+    }
+
 }
