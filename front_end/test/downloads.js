@@ -18,18 +18,18 @@ import * as assert from 'assert';
 import { Downloads } from "../src/backend/downloads.js";
 import * as sinon from 'sinon';
 import axios from 'axios';
-import { it } from 'mocha';
+import { describe, it } from 'mocha';
 
 async function fakeAxiosGet(URL) {
-    // If the URL is 'wrong' -> return -1
-    const wrong_URL = `https://storage.googleapis.com/wrongBucket/wrongFile`;
-    if (URL == wrong_URL) {
+    // Use a specific "wrong URL" to mimic a GET request failing. Return -1 as specified in downloads.js
+    const wrongURL = `https://storage.googleapis.com/wrongBucket/wrongFile`;
+    if (URL == wrongURL) {
         return -1;
     }
 
     // If the URL does not match https://storage.googleapis.com/${bucketName}/${fileName}, throw an error.
-    const URL_regex = 'https:\/\/storage\.googleapis\.com\/([a-zA-Z]+(-[a-zA-Z]+)+)[0-9]+\/[0-9]+([a-zA-Z]+(\.[a-zA-Z]+)+)';
-    if (!URL.match(URL_regex)) {
+    const regexURL = 'https:\/\/storage\.googleapis\.com\/([a-zA-Z]+(-[a-zA-Z]+)+)[0-9]+\/[0-9]+([a-zA-Z]+(\.[a-zA-Z]+)+)';
+    if (!URL.match(regexURL)) {
         throw new Error('URL is not well defined');
     }
 }
@@ -41,19 +41,20 @@ function fakeDateNow() {
 describe('downloads', () => {
     let downloads;
 
-    beforeEach(() => {
-        downloads = new Downloads();
-    })
-
     sinon.stub(Date, "now").callsFake(fakeDateNow);
     sinon.stub(axios, "get").callsFake(fakeAxiosGet);
 
+    beforeEach(() => {
+        downloads = new Downloads();
+    });
+
     describe('downloadFile', () => {
-        it('should return -1 on failure', async () => {
+        it('should return -1 on failure of GET request', async () => {
             const URL = 'poorly_formed_URL';
             const result = await downloads.downloadFile(URL);
             assert.equal(result, -1);
         });
+
         it('should return 0 on success', async () => {
             const URL = 'https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt';
             const result = await downloads.downloadFile(URL);
@@ -72,12 +73,6 @@ describe('downloads', () => {
             catch (e) {
                 assert.deepEqual(e, new Error("Invalid Bucket Name"));
             }
-
-            // assert.throws(
-            //     () => { downloads.timeDownload(fileName, bucketName) },
-            //     "Error: Invalid Bucket Name",
-            // );
-
         });
 
         it('should throw Error if fileName is invalid', async () => {
@@ -98,13 +93,20 @@ describe('downloads', () => {
 
             let result = await downloads.timeDownload(fileName, bucketName);
             assert.equal(result, -0.001);
-        })
+        });
 
         it('should return 0 on success', async () => {
             const fileName = "2mib.txt";
             const bucketName = "us-west1";
             const result = await downloads.timeDownload(fileName, bucketName);
             assert.equal(result, 0);
+        });
+
+        it('should build URL correctly', async () => {
+            const fileName = "2mib.txt";
+            const bucketName = "us-west1";
+            await downloads.timeDownload(fileName, bucketName);
+            assert.equal(downloads._builtURL, `https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`);
         });
     });
 
@@ -202,7 +204,7 @@ describe('downloads', () => {
             assert.equal(result, expected);
         });
 
-        it('should return JSON String with bad values if GET request fails', async () => {
+        it('should return JSON String with default values if GET request fails', async () => {
             const fileName = "wrongFile";
             const bucketName = "wrongBucket";
 

@@ -19,7 +19,10 @@ import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from "./common.js";
 import axios from "axios";
 
 export class Downloads {
+    _builtURL;
+
     async downloadFile(URL) {
+        this._builtURL = URL;
         try {
             const start = Date.now();
             await axios.get(URL);
@@ -29,7 +32,6 @@ export class Downloads {
             return -1;
         }
     }
-
 
     async timeDownload(fileName, bucket) {
         if (fileName != "wrongFile" && bucket != "wrongBucket") {
@@ -78,5 +80,4 @@ export class Downloads {
         arr.push(Object.fromEntries(result));
         return JSON.stringify(arr);
     }
-
 }
