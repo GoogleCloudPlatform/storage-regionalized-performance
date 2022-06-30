@@ -15,7 +15,7 @@
  */
 
 import * as assert from 'assert';
-import * as downloads from "../src/backend/downloads.js";
+import { Downloads } from "../src/backend/downloads.js";
 import * as sinon from 'sinon';
 import axios from 'axios';
 import { it } from 'mocha';
@@ -31,6 +31,8 @@ async function fakeAxiosGet(URL) {
 function fakeDateNow() {
     return 1;
 }
+
+let downloads = new Downloads();
 
 describe('downloads', () => {
     sinon.stub(Date, "now").callsFake(fakeDateNow);
@@ -50,44 +52,35 @@ describe('downloads', () => {
     });
 
     describe('timeDownload', () => {
-        it('should return -0.001 on failure', async () => {
-            const fileName = "random_file_name";
+        it('should throw Error if bucketName is invalid', async () => {
+            const fileName = "2mib.txt";
             const bucketName = "random_bucket_name";
-            const result = await downloads.timeDownload(fileName, bucketName);
-            assert.equal(result, -0.001);
+
+            try {
+                await downloads.timeDownload(fileName, bucketName);
+            }
+            catch (e) {
+                assert.deepEqual(e, new Error("Invalid Bucket Name"));
+            }
         });
+
+        it('should throw Error if fileName is invalid', async () => {
+            const fileName = "random_file_name";
+            const bucketName = "us-west1";
+
+            try {
+                await downloads.timeDownload(fileName, bucketName);
+            }
+            catch (e) {
+                assert.deepEqual(e, new Error("Invalid File Name"));
+            }
+        })
+
         it('should return 0 on success', async () => {
             const fileName = "2mib.txt";
             const bucketName = "us-west1";
             const result = await downloads.timeDownload(fileName, bucketName);
             assert.equal(result, 0);
         });
-        // @TODO:
-        // should add another test here to spy and make sure that downloadFile 
-        // is being called with the right URL - all the functions need to be wrapped in a class!
     });
-
-    describe('benchmarkSingleDownload', () => {
-        // this could fail if axios fails, or if the file name and bucket name do not exist. 
-        // i set up this test very poorly bc multiple parts could fail INDEPENDENTLY, and axios could fail for multiple reasons (not just bad URL)
-        // OR we need need less ambiguous formed REGEX. 
-        // change the function to actually throw an error if any one of those are undefined!!
-        it('should form object correctly when inputs are malformed', async () => {
-            const fileName = "random_file_name";
-            const bucketName = "random_bucket_name";
-            const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
-
-            let expected = new Map();
-            expected.set('bucketName', 'random_bucket_name');
-            expected.set('location', 'location');
-            expected.set('fileName', 'random_file_name');
-            expected.set('timeTaken', -0.001);
-            expected.set('fileSizeBytes', 0);
-            expected.set('speedBps', '0.000');
-            expected.set('speedMiBps', '0.000');
-
-            assert.deepEqual(result, expected)
-        });
-    });
-
 })
