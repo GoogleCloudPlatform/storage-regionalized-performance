@@ -21,6 +21,12 @@ import axios from 'axios';
 import { it } from 'mocha';
 
 async function fakeAxiosGet(URL) {
+    // If the URL is 'wrong' -> return -1
+    const wrong_URL = `https://storage.googleapis.com/wrongBucket/wrongFile`;
+    if (URL == wrong_URL) {
+        return -1;
+    }
+
     // If the URL does not match https://storage.googleapis.com/${bucketName}/${fileName}, throw an error.
     const URL_regex = 'https:\/\/storage\.googleapis\.com\/([a-zA-Z]+(-[a-zA-Z]+)+)[0-9]+\/[0-9]+([a-zA-Z]+(\.[a-zA-Z]+)+)';
     if (!URL.match(URL_regex)) {
@@ -32,9 +38,13 @@ function fakeDateNow() {
     return 1;
 }
 
-let downloads = new Downloads();
-
 describe('downloads', () => {
+    let downloads;
+
+    beforeEach(() => {
+        downloads = new Downloads();
+    })
+
     sinon.stub(Date, "now").callsFake(fakeDateNow);
     sinon.stub(axios, "get").callsFake(fakeAxiosGet);
 
@@ -82,11 +92,13 @@ describe('downloads', () => {
             }
         });
 
-        //  @TODO: How to force axios to fail even with correct inputs? 
-        // Or should downloadFile be allowed to throw an error directly?
-        // it('should return -0.001 if GET request fails', async () => {
+        it('should return -0.001 if GET request fails', async () => {
+            const bucketName = "wrongBucket";
+            const fileName = "wrongFile";
 
-        // })
+            let result = await downloads.timeDownload(fileName, bucketName);
+            assert.equal(result, -0.001);
+        })
 
         it('should return 0 on success', async () => {
             const fileName = "2mib.txt";
@@ -103,13 +115,13 @@ describe('downloads', () => {
             const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
             let expected = new Map();
-            expected.set('bucketName', 'us-west1')
-            expected.set('location', 'Oregon')
-            expected.set('fileName', '2mib.txt')
-            expected.set('timeTaken', 0)
-            expected.set('fileSizeBytes', 2097152)
-            expected.set('speedBps', 'Infinity')
-            expected.set('speedMiBps', 'Infinity')
+            expected.set('bucketName', 'us-west1');
+            expected.set('location', 'Oregon');
+            expected.set('fileName', '2mib.txt');
+            expected.set('timeTaken', 0);
+            expected.set('fileSizeBytes', 2097152);
+            expected.set('speedBps', 'Infinity');
+            expected.set('speedMiBps', 'Infinity');
 
             assert.deepEqual(result, expected);
         });
@@ -138,10 +150,23 @@ describe('downloads', () => {
             }
         });
 
-        //@TODO: How to force axios to fail even with correct inputs?
-        // it('should return a poorly formed Map if GET request fails', async() => {
+        it('should return Map with bad values if GET request fails', async () => {
+            const fileName = "wrongFile";
+            const bucketName = "wrongBucket";
 
-        // })
+            let result = await downloads.benchmarkSingleDownload(fileName, bucketName);
+
+            let expected = new Map();
+            expected.set('bucketName', 'wrongBucket');
+            expected.set('fileName', 'wrongFile');
+            expected.set('fileSizeBytes', 'wrongFile');
+            expected.set('location', 'wrongBucket');
+            expected.set('speedBps', '-1.000');
+            expected.set('speedMiBps', '-1.000');
+            expected.set('timeTaken', -0.001);
+
+            assert.deepEqual(result, expected);
+        })
     });
 
     describe('benchmarkDownload', () => {
@@ -173,8 +198,18 @@ describe('downloads', () => {
             const fileName = "2mib.txt";
             const bucketName = "us-west1";
             let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = `[{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":0,"fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}]`
-            assert.equal(result, expected)
+            let expected = `[{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":0,"fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}]`;
+            assert.equal(result, expected);
+        });
+
+        it('should return JSON String with bad values if GET request fails', async () => {
+            const fileName = "wrongFile";
+            const bucketName = "wrongBucket";
+
+            let result = await downloads.benchmarkDownload(fileName, bucketName);
+            let expected = `[{"bucketName":"wrongBucket","location":"wrongBucket","fileName":"wrongFile","timeTaken":-0.001,"fileSizeBytes":"wrongFile","speedBps":"-1.000","speedMiBps":"-1.000"}]`;
+
+            assert.equal(result, expected);
         })
     });
 })

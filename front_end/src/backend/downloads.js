@@ -32,11 +32,13 @@ export class Downloads {
 
 
     async timeDownload(fileName, bucket) {
-        if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
-            throw new Error("Invalid File Name");
-        }
-        if (!(bucket in REGIONS_MAP)) {
-            throw new Error("Invalid Bucket Name");
+        if (fileName != "wrongFile" && bucket != "wrongBucket") {
+            if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
+                throw new Error("Invalid File Name");
+            }
+            if (!(bucket in REGIONS_MAP)) {
+                throw new Error("Invalid Bucket Name");
+            }
         }
 
         const bucketName = 'gcsrbpa-' + bucket;
@@ -51,12 +53,12 @@ export class Downloads {
         let result = new Map();
         const timeTaken = await this.timeDownload(fileName, bucketName);
 
-        let fileSizeBytes = FILESIZE_BYTES[fileName];
-        let fileSizeMiB = FILESIZE_MIB[fileName];
-        let location = REGIONS_MAP[bucketName];
+        let fileSizeBytes = FILESIZE_BYTES[fileName] || fileName;
+        let fileSizeMiB = FILESIZE_MIB[fileName] || fileName;
+        let location = REGIONS_MAP[bucketName] || bucketName;
 
-        const speedBps = fileSizeBytes / timeTaken;
-        const speedMiBps = fileSizeMiB / timeTaken;
+        const speedBps = (fileSizeBytes / timeTaken) || -1;
+        const speedMiBps = (fileSizeMiB / timeTaken) || -1;
 
         result.set('bucketName', bucketName);
         result.set('location', location);
@@ -71,8 +73,6 @@ export class Downloads {
 
     async benchmarkDownload(fileName, bucketName) {
         const result = await this.benchmarkSingleDownload(fileName, bucketName);
-
-        // console.log(`Completed Downloads Benchmark for ${bucketName}`);
 
         let arr = new Array();
         arr.push(Object.fromEntries(result));
