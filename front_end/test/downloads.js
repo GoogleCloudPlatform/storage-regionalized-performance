@@ -62,6 +62,12 @@ describe('downloads', () => {
             catch (e) {
                 assert.deepEqual(e, new Error("Invalid Bucket Name"));
             }
+
+            // assert.throws(
+            //     () => { downloads.timeDownload(fileName, bucketName) },
+            //     "Error: Invalid Bucket Name",
+            // );
+
         });
 
         it('should throw Error if fileName is invalid', async () => {
@@ -74,7 +80,13 @@ describe('downloads', () => {
             catch (e) {
                 assert.deepEqual(e, new Error("Invalid File Name"));
             }
-        })
+        });
+
+        //  @TODO: How to force axios to fail even with correct inputs? 
+        // Or should downloadFile be allowed to throw an error directly?
+        // it('should return -0.001 if GET request fails', async () => {
+
+        // })
 
         it('should return 0 on success', async () => {
             const fileName = "2mib.txt";
@@ -82,5 +94,87 @@ describe('downloads', () => {
             const result = await downloads.timeDownload(fileName, bucketName);
             assert.equal(result, 0);
         });
+    });
+
+    describe('benchmarkSingleDownload', () => {
+        it('should return a Map object on success', async () => {
+            const fileName = "2mib.txt";
+            const bucketName = "us-west1";
+            const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
+
+            let expected = new Map();
+            expected.set('bucketName', 'us-west1')
+            expected.set('location', 'Oregon')
+            expected.set('fileName', '2mib.txt')
+            expected.set('timeTaken', 0)
+            expected.set('fileSizeBytes', 2097152)
+            expected.set('speedBps', 'Infinity')
+            expected.set('speedMiBps', 'Infinity')
+
+            assert.deepEqual(result, expected);
+        });
+
+        it('should throw Error if fileName is invalid', async () => {
+            const fileName = "random_file_name";
+            const bucketName = "us-west1";
+
+            try {
+                await downloads.benchmarkSingleDownload(fileName, bucketName);
+            }
+            catch (e) {
+                assert.deepEqual(e, new Error("Invalid File Name"));
+            }
+        });
+
+        it('should throw Error if bucketName is invalid', async () => {
+            const fileName = "2mib.txt";
+            const bucketName = "random_bucket_name";
+
+            try {
+                await downloads.benchmarkSingleDownload(fileName, bucketName);
+            }
+            catch (e) {
+                assert.deepEqual(e, new Error("Invalid Bucket Name"));
+            }
+        });
+
+        //@TODO: How to force axios to fail even with correct inputs?
+        // it('should return a poorly formed Map if GET request fails', async() => {
+
+        // })
+    });
+
+    describe('benchmarkDownload', () => {
+        it('should throw Error if fileName is invalid', async () => {
+            const fileName = "random_file_name";
+            const bucketName = "us-west1";
+
+            try {
+                await downloads.benchmarkDownload(fileName, bucketName);
+            }
+            catch (e) {
+                assert.deepEqual(e, new Error("Invalid File Name"));
+            }
+        });
+
+        it('should throw Error if bucketName is invalid', async () => {
+            const fileName = "2mib.txt";
+            const bucketName = "random_bucket_name";
+
+            try {
+                await downloads.benchmarkDownload(fileName, bucketName);
+            }
+            catch (e) {
+                assert.deepEqual(e, new Error("Invalid Bucket Name"));
+            }
+        });
+
+        it('should return JSON String on success', async () => {
+            const fileName = "2mib.txt";
+            const bucketName = "us-west1";
+            let result = await downloads.benchmarkDownload(fileName, bucketName);
+            let expected = `[{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":0,"fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}]`
+            assert.equal(result, expected)
+        })
     });
 })

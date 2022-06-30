@@ -21,7 +21,6 @@ import axios from "axios";
 export class Downloads {
     async downloadFile(URL) {
         try {
-
             const start = Date.now();
             await axios.get(URL);
             const end = Date.now() - start;
@@ -52,8 +51,6 @@ export class Downloads {
         let result = new Map();
         const timeTaken = await this.timeDownload(fileName, bucketName);
 
-
-
         let fileSizeBytes = FILESIZE_BYTES[fileName];
         let fileSizeMiB = FILESIZE_MIB[fileName];
         let location = REGIONS_MAP[bucketName];
@@ -75,7 +72,7 @@ export class Downloads {
     async benchmarkDownload(fileName, bucketName) {
         const result = await this.benchmarkSingleDownload(fileName, bucketName);
 
-        console.log(`Completed Downloads Benchmark for ${bucketName}`);
+        // console.log(`Completed Downloads Benchmark for ${bucketName}`);
 
         let arr = new Array();
         arr.push(Object.fromEntries(result));

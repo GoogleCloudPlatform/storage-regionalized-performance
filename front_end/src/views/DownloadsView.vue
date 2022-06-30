@@ -15,10 +15,16 @@
 -->
 
 <template>
-  <div> 
-    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.small)">2MiB</button>
-    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.medium)">64MiB</button>
-    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.large)">256MiB</button>
+  <div>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.small)">
+      2MiB
+    </button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.medium)">
+      64MiB
+    </button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.large)">
+      256MiB
+    </button>
     <ProgressBar :progressWidth="progressBarWidth" />
     <ResultsTable :results="results" ref="resultsTable" />
   </div>
@@ -29,8 +35,8 @@
 import ResultsTable from "@/components/ResultsTable";
 import ProgressBar from "../components/ProgressBar";
 // const downloads = require("@/backend/downloads");
-import {Downloads} from "@/backend/downloads"
-import {REGIONS_MAP, FILESIZES_NAMES} from "@/backend/common";
+import { Downloads } from "@/backend/downloads";
+import { REGIONS_MAP, FILESIZES_NAMES } from "@/backend/common";
 
 let currentFileSize = FILESIZES_NAMES.small;
 let progressBarCount = 0;
@@ -42,7 +48,7 @@ export default {
       results: [],
       currentFileSize: currentFileSize,
       progressBarWidth: "0%",
-      FILESIZES_NAMES: FILESIZES_NAMES
+      FILESIZES_NAMES: FILESIZES_NAMES,
     };
   },
   methods: {
@@ -69,8 +75,9 @@ export default {
             return 0;
           });
 
-          //Updating progress bar 
-          progressBarCount = 100 * (this.results.length / Object.keys(REGIONS_MAP).length);
+          //Updating progress bar
+          progressBarCount =
+            100 * (this.results.length / Object.keys(REGIONS_MAP).length);
           this.progressBarWidth = progressBarCount.toString() + "%";
 
           console.log("Downloads Success! ^_^");
