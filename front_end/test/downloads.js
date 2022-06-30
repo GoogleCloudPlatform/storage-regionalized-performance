@@ -67,24 +67,14 @@ describe('downloads', () => {
             const fileName = "2mib.txt";
             const bucketName = "random_bucket_name";
 
-            try {
-                await downloads.timeDownload(fileName, bucketName);
-            }
-            catch (e) {
-                assert.deepEqual(e, new Error("Invalid Bucket Name"));
-            }
+            assert.rejects(downloads.timeDownload(fileName, bucketName), "Invalid Bucket Name");
         });
 
         it('should throw Error if fileName is invalid', async () => {
             const fileName = "random_file_name";
             const bucketName = "us-west1";
 
-            try {
-                await downloads.timeDownload(fileName, bucketName);
-            }
-            catch (e) {
-                assert.deepEqual(e, new Error("Invalid File Name"));
-            }
+            assert.rejects(downloads.timeDownload(fileName, bucketName), "Invalid File Name");
         });
 
         it('should return -0.001 if GET request fails', async () => {
@@ -132,24 +122,14 @@ describe('downloads', () => {
             const fileName = "random_file_name";
             const bucketName = "us-west1";
 
-            try {
-                await downloads.benchmarkSingleDownload(fileName, bucketName);
-            }
-            catch (e) {
-                assert.deepEqual(e, new Error("Invalid File Name"));
-            }
+            assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), "Invalid File Name");
         });
 
         it('should throw Error if bucketName is invalid', async () => {
             const fileName = "2mib.txt";
             const bucketName = "random_bucket_name";
 
-            try {
-                await downloads.benchmarkSingleDownload(fileName, bucketName);
-            }
-            catch (e) {
-                assert.deepEqual(e, new Error("Invalid Bucket Name"));
-            }
+            assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), "Invalid Bucket Name");
         });
 
         it('should return Map with bad values if GET request fails', async () => {
@@ -176,24 +156,14 @@ describe('downloads', () => {
             const fileName = "random_file_name";
             const bucketName = "us-west1";
 
-            try {
-                await downloads.benchmarkDownload(fileName, bucketName);
-            }
-            catch (e) {
-                assert.deepEqual(e, new Error("Invalid File Name"));
-            }
+            assert.rejects(downloads.benchmarkDownload(fileName, bucketName), "Invalid File Name");
         });
 
         it('should throw Error if bucketName is invalid', async () => {
             const fileName = "2mib.txt";
             const bucketName = "random_bucket_name";
 
-            try {
-                await downloads.benchmarkDownload(fileName, bucketName);
-            }
-            catch (e) {
-                assert.deepEqual(e, new Error("Invalid Bucket Name"));
-            }
+            assert.rejects(downloads.benchmarkDownload(fileName, bucketName), "Invalid Bucket Name");
         });
 
         it('should return JSON String on success', async () => {
