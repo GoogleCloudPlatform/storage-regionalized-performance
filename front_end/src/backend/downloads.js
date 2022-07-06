@@ -15,8 +15,8 @@
  */
 
 // In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
-import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from "./common.js";
-import axios from "axios";
+import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from './common.js';
+import axios from 'axios';
 
 export class Downloads {
     _builtURL;
@@ -34,12 +34,12 @@ export class Downloads {
     }
 
     async timeDownload(fileName, bucket) {
-        if (fileName != "wrongFile" && bucket != "wrongBucket") {
+        if (fileName != 'wrongFile' && bucket != 'wrongBucket') {
             if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
-                throw new Error("Invalid File Name");
+                throw new Error('Invalid File Name');
             }
             if (!(bucket in REGIONS_MAP)) {
-                throw new Error("Invalid Bucket Name");
+                throw new Error('Invalid Bucket Name');
             }
         }
 

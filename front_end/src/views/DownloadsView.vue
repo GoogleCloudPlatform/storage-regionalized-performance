@@ -32,22 +32,21 @@
 
 
 <script>
-import ResultsTable from "@/components/ResultsTable";
-import ProgressBar from "../components/ProgressBar";
-// const downloads = require("@/backend/downloads");
-import { Downloads } from "@/backend/downloads";
-import { REGIONS_MAP, FILESIZES_NAMES } from "@/backend/common";
+import ResultsTable from '@/components/ResultsTable';
+import ProgressBar from '../components/ProgressBar';
+import { Downloads } from '@/backend/downloads';
+import { REGIONS_MAP, FILESIZES_NAMES } from '@/backend/common';
 
 let currentFileSize = FILESIZES_NAMES.small;
 let progressBarCount = 0;
 
 export default {
-  name: "DownloadsView",
+  name: 'DownloadsView',
   data() {
     return {
       results: [],
       currentFileSize: currentFileSize,
-      progressBarWidth: "0%",
+      progressBarWidth: '0%',
       FILESIZES_NAMES: FILESIZES_NAMES,
     };
   },
@@ -56,7 +55,7 @@ export default {
       currentFileSize = fileSize.toString();
       //reset progress bar
       progressBarCount = 0;
-      this.progressBarWidth = progressBarCount.toString() + "%";
+      this.progressBarWidth = progressBarCount.toString() + '%';
 
       this.results = [];
       const fileName = currentFileSize;
@@ -78,12 +77,12 @@ export default {
           //Updating progress bar
           progressBarCount =
             100 * (this.results.length / Object.keys(REGIONS_MAP).length);
-          this.progressBarWidth = progressBarCount.toString() + "%";
+          this.progressBarWidth = progressBarCount.toString() + '%';
 
-          console.log("Downloads Success! ^_^");
+          console.log('Downloads Success! ^_^');
         } catch (e) {
           console.log(e);
-          console.log("Downloads Failed! :(");
+          console.log('Downloads Failed! :(');
         }
       }
     },
