@@ -52,13 +52,13 @@ describe('downloads', () => {
         it('should return -1 on failure of GET request', async () => {
             const URL = 'poorly_formed_URL';
             const result = await downloads.downloadFile(URL);
-            assert.equal(result, -1);
+            assert.deepStrictEqual(result, -1);
         });
 
         it('should return 0 on success', async () => {
             const URL = 'https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt';
             const result = await downloads.downloadFile(URL);
-            assert.equal(result, 0);
+            assert.deepStrictEqual(result, 0);
         });
     });
 
@@ -82,21 +82,21 @@ describe('downloads', () => {
             const fileName = 'wrongFile';
 
             let result = await downloads.timeDownload(fileName, bucketName);
-            assert.equal(result, -0.001);
+            assert.deepStrictEqual(result, -0.001);
         });
 
         it('should return 0 on success', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
             const result = await downloads.timeDownload(fileName, bucketName);
-            assert.equal(result, 0);
+            assert.deepStrictEqual(result, 0);
         });
 
         it('should build URL correctly', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
             await downloads.timeDownload(fileName, bucketName);
-            assert.equal(downloads._builtURL, `https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`);
+            assert.deepStrictEqual(downloads._builtURL, `https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`);
         });
     });
 
@@ -110,12 +110,12 @@ describe('downloads', () => {
             expected.set('bucketName', 'us-west1');
             expected.set('location', 'Oregon');
             expected.set('fileName', '2mib.txt');
-            expected.set('timeTaken', 0);
+            expected.set('timeTaken', '0.000');
             expected.set('fileSizeBytes', 2097152);
             expected.set('speedBps', 'Infinity');
             expected.set('speedMiBps', 'Infinity');
 
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
 
         it('should throw Error if fileName is invalid', async () => {
@@ -145,9 +145,9 @@ describe('downloads', () => {
             expected.set('location', 'wrongBucket');
             expected.set('speedBps', '-1.000');
             expected.set('speedMiBps', '-1.000');
-            expected.set('timeTaken', -0.001);
+            expected.set('timeTaken', '-0.001');
 
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         })
     });
 
@@ -171,7 +171,7 @@ describe('downloads', () => {
             const bucketName = 'us-west1';
             let result = await downloads.benchmarkDownload(fileName, bucketName);
             let expected = `[{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":"0.000","fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}]`;
-            assert.equal(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
 
         it('should return JSON String with default values if GET request fails', async () => {
@@ -181,7 +181,7 @@ describe('downloads', () => {
             let result = await downloads.benchmarkDownload(fileName, bucketName);
             let expected = `[{"bucketName":"wrongBucket","location":"wrongBucket","fileName":"wrongFile","timeTaken":"-0.001","fileSizeBytes":"wrongFile","speedBps":"-1.000","speedMiBps":"-1.000"}]`;
 
-            assert.equal(result, expected);
+            assert.deepStrictEqual(result, expected);
         })
     });
 })
