@@ -15,7 +15,9 @@
  */
 
 /**
- * All bucket regions and their associated Locations
+ * All supported Google Cloud Storage single bucket regions and their 
+ * associated Locations
+ * Source: https://cloud.google.com/storage/docs/locations
  * @enum
  */
 export const REGIONS_MAP = Object.freeze({
@@ -56,7 +58,7 @@ export const REGIONS_MAP = Object.freeze({
 });
 
 /**
- * FileSizes and their associated file names
+ * Sizes of files in each bucket and their associated file names
  * @enum 
  */
 export const FILESIZES_NAMES = Object.freeze({
@@ -66,7 +68,7 @@ export const FILESIZES_NAMES = Object.freeze({
 });
 
 /**
- * FileSizes and their associated size in bytes
+ * Sizes of files in each bucket and their associated size in bytes
  */
 export const FILESIZE_BYTES = Object.freeze({
     [FILESIZES_NAMES.small]: 2097152,
@@ -75,7 +77,7 @@ export const FILESIZE_BYTES = Object.freeze({
 });
 
 /**
- * FileSizes and their associated size in  MiB
+ * Sizes of files in each bucket and their associated size in MiB
  */
 export const FILESIZE_MIB = Object.freeze({
     [FILESIZES_NAMES.small]: 2,
