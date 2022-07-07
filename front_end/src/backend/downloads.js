@@ -35,10 +35,12 @@ export class Downloads {
     async timeDownload(fileName, bucket) {
         if (fileName != 'wrongFile' && bucket != 'wrongBucket') {
             if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
-                throw new Error('Invalid File Name');
+                let errorMessage = `Invalid File Name: '${fileName}'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`
+                throw new Error(errorMessage);
             }
             if (!(bucket in REGIONS_MAP)) {
-                throw new Error('Invalid Bucket Name');
+                let errorMessage = `Invalid Bucket Name: '${bucket}'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`
+                throw new Error(errorMessage);
             }
         }
 

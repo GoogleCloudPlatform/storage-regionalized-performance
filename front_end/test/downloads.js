@@ -38,6 +38,9 @@ function fakeDateNow() {
     return 1;
 }
 
+const ERR_MSG_INVALID_FILE = `Invalid File Name: 'random_file_name'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`;
+const ERR_MSG_INVALID_BUCKET = `Invalid Bucket Name: 'random_bucket_name'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`;
+
 describe('downloads', () => {
     let downloads;
 
@@ -67,14 +70,14 @@ describe('downloads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'random_bucket_name';
 
-            assert.rejects(downloads.timeDownload(fileName, bucketName), 'Invalid Bucket Name');
+            await assert.rejects(downloads.timeDownload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
         });
 
         it('should throw Error if fileName is invalid', async () => {
             const fileName = 'random_file_name';
             const bucketName = 'us-west1';
 
-            assert.rejects(downloads.timeDownload(fileName, bucketName), 'Invalid File Name');
+            await assert.rejects(downloads.timeDownload(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
         });
 
         it('should return -0.001 if GET request fails', async () => {
@@ -122,14 +125,14 @@ describe('downloads', () => {
             const fileName = 'random_file_name';
             const bucketName = 'us-west1';
 
-            assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), 'Invalid File Name');
+            await assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
         });
 
         it('should throw Error if bucketName is invalid', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'random_bucket_name';
 
-            assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), 'Invalid Bucket Name');
+            await assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
         });
 
         it('should return Map with bad values if GET request fails', async () => {
@@ -156,21 +159,23 @@ describe('downloads', () => {
             const fileName = 'random_file_name';
             const bucketName = 'us-west1';
 
-            assert.rejects(downloads.benchmarkDownload(fileName, bucketName), 'Invalid File Name');
+            await assert.rejects(downloads.benchmarkDownload(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
         });
 
         it('should throw Error if bucketName is invalid', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'random_bucket_name';
 
-            assert.rejects(downloads.benchmarkDownload(fileName, bucketName), 'Invalid Bucket Name');
+            await assert.rejects(downloads.benchmarkDownload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
         });
 
         it('should return JSON String on success', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
+
             let result = await downloads.benchmarkDownload(fileName, bucketName);
             let expected = `[{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":"0.000","fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}]`;
+
             assert.deepStrictEqual(result, expected);
         });
 
