@@ -27,7 +27,7 @@ export class Downloads {
             const start = performance.now();
             await axios.get(URL);
             const end = performance.now() - start;
-            return end;
+            return end.toFixed(3);
         } catch (e) {
             return -1;
         }
