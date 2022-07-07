@@ -24,9 +24,9 @@ export class Downloads {
     async downloadFile(URL) {
         this._builtURL = URL;
         try {
-            const start = Date.now();
+            const start = performance.now();
             await axios.get(URL);
-            const end = Date.now() - start;
+            const end = performance.now() - start;
             return end;
         } catch (e) {
             return -1;

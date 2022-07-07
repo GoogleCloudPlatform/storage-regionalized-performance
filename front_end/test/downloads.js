@@ -41,7 +41,7 @@ function fakeDateNow() {
 describe('downloads', () => {
     let downloads;
 
-    sinon.stub(Date, 'now').callsFake(fakeDateNow);
+    sinon.stub(performance, 'now').callsFake(fakeDateNow);
     sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
 
     beforeEach(() => {
