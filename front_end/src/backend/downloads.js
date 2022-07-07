@@ -26,8 +26,7 @@ export class Downloads {
         try {
             const start = performance.now();
             await axios.get(URL);
-            const end = performance.now() - start;
-            return end.toFixed(3);
+            return performance.now() - start;
         } catch (e) {
             return -1;
         }
@@ -43,7 +42,7 @@ export class Downloads {
             }
         }
 
-        const bucketName = 'gcsrbpa-' + bucket;
+        const bucketName = `gcsrbpa-${bucket}`;
 
         const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
@@ -65,7 +64,7 @@ export class Downloads {
         result.set('bucketName', bucketName);
         result.set('location', location);
         result.set('fileName', fileName);
-        result.set('timeTaken', timeTaken);
+        result.set('timeTaken', timeTaken.toFixed(3));
         result.set('fileSizeBytes', fileSizeBytes);
         result.set('speedBps', speedBps.toFixed(3));
         result.set('speedMiBps', speedMiBps.toFixed(3));
