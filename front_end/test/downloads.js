@@ -41,6 +41,11 @@ function fakeDateNow() {
 const ERR_MSG_INVALID_FILE = `Invalid File Name: 'random_file_name'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`;
 const ERR_MSG_INVALID_BUCKET = `Invalid Bucket Name: 'random_bucket_name'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`;
 
+const VALID_BUCKET_NAME = 'us-west1';
+const VALID_FILE_NAME = '2mib.txt';
+const INVALID_BUCKET_NAME = 'random_bucket_name';
+const INVALID_FILE_NAME = 'random_file_name';
+
 describe('downloads', () => {
     let downloads;
 
@@ -174,7 +179,7 @@ describe('downloads', () => {
             const bucketName = 'us-west1';
 
             let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = `[{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":"0.000","fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}]`;
+            let expected = [{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":"0.000","fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}];
 
             assert.deepStrictEqual(result, expected);
         });
@@ -184,7 +189,7 @@ describe('downloads', () => {
             const bucketName = 'wrongBucket';
 
             let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = `[{"bucketName":"wrongBucket","location":"wrongBucket","fileName":"wrongFile","timeTaken":"-0.001","fileSizeBytes":"wrongFile","speedBps":"-1.000","speedMiBps":"-1.000"}]`;
+            let expected = [{"bucketName":"wrongBucket","location":"wrongBucket","fileName":"wrongFile","timeTaken":"-0.001","fileSizeBytes":"wrongFile","speedBps":"-1.000","speedMiBps":"-1.000"}];
 
             assert.deepStrictEqual(result, expected);
         })

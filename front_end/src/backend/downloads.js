@@ -79,6 +79,6 @@ export class Downloads {
 
         let arr = new Array();
         arr.push(Object.fromEntries(result));
-        return JSON.stringify(arr);
+        return arr;
     }
 }

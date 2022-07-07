@@ -64,7 +64,7 @@ export default {
       for (let bucketName in REGIONS_MAP) {
         try {
           let result = await downloads.benchmarkDownload(fileName, bucketName);
-          this.results = this.results.concat(JSON.parse(result));
+          this.results = this.results.concat(result);
           this.results = this.results.sort((a, b) => {
             if (a.timeTaken < b.timeTaken) {
               return -1;
