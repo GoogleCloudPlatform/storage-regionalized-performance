@@ -26,7 +26,7 @@ export class Downloads {
     
     /**
      * Measures time in milliseconds taken to download a file from a bucket to memory as specified by the input URL.
-     * Returns -1 if download fails. 
+     * Returns -1 if download fails so that a set of benchmarks may continue running even where one fails. 
      * 
      * @private
      * @param {string} URL - URL to send HTTP GET request.
@@ -76,7 +76,9 @@ export class Downloads {
 
     /**
      * Runs download benchmark and returns a HashMap with keys 'bucketName', 'location', 'fileName', 
-     * 'timeTaken', 'fileSizeBytes', 'speedBps', 'speedMiBps'. HashMap values are stringified results.
+     * 'timeTaken', 'fileSizeBytes', 'speedBps', 'speedMiBps'. 
+     * All numerical results are rounded to three decimal places.
+     * All HashMap values are strings.
      * 
      * @param {string} fileName 
      * @param {string} bucketName 
@@ -105,11 +107,11 @@ export class Downloads {
     }
 
     /**
-     * Runs download benchmark and returns HashMap of results wrapped in an Array.
+     * Runs download benchmark and returns Object representation of results wrapped in an Array.
      * 
      * @param {string} fileName 
      * @param {string} bucketName 
-     * @returns {Map.<string, string>[]}
+     * @returns {Array.<Object.<string, string>>}
      */
     async benchmarkDownload(fileName, bucketName) {
         const result = await this.benchmarkSingleDownload(fileName, bucketName);
