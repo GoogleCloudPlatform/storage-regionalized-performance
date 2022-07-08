@@ -21,12 +21,6 @@ import axios from 'axios';
 import { describe, it } from 'mocha';
 
 async function fakeAxiosGet(URL) {
-    // Use a specific 'wrong URL' to mimic a GET request failing. Return -1 as specified in downloads.js
-    const wrongURL = `https://storage.googleapis.com/wrongBucket/wrongFile`;
-    if (URL == wrongURL) {
-        return -1;
-    }
-
     // If the URL does not match https://storage.googleapis.com/${bucketName}/${fileName}, throw an error.
     const regexURL = 'https:\/\/storage\.googleapis\.com\/([a-zA-Z]+(-[a-zA-Z]+)+)[0-9]+\/[0-9]+([a-zA-Z]+(\.[a-zA-Z]+)+)';
     if (!URL.match(regexURL)) {
@@ -38,20 +32,19 @@ function fakeDateNow() {
     return 1;
 }
 
+// Function that simulates failure of axios in Downloads.getDurationOfGetRequest()
+async function fakeGetDurationOfGetRequest() {
+    return -1;
+}
+
 const ERR_MSG_INVALID_FILE = `Invalid File Name: 'random_file_name'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`;
 const ERR_MSG_INVALID_BUCKET = `Invalid Bucket Name: 'random_bucket_name'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`;
 
-const VALID_BUCKET_NAME = 'us-west1';
-const VALID_FILE_NAME = '2mib.txt';
-const INVALID_BUCKET_NAME = 'random_bucket_name';
-const INVALID_FILE_NAME = 'random_file_name';
-
 describe('downloads', () => {
     let downloads;
-
     sinon.stub(performance, 'now').callsFake(fakeDateNow);
     sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
-
+    
     beforeEach(() => {
         downloads = new Downloads();
     });
@@ -88,11 +81,15 @@ describe('downloads', () => {
         // downloads.downloadFile() returns -1 on failure, which is divided by 1000 to 
         // convert from millisecs to seconds. -1/1000 = -0.001.
         it('should return -0.001 if GET request fails', async () => {
-            const bucketName = 'wrongBucket';
-            const fileName = 'wrongFile';
+            sinon.stub(downloads, 'getDurationOfGetRequest').callsFake(fakeGetDurationOfGetRequest)
+
+            const bucketName = 'us-west1';
+            const fileName = '2mib.txt';
 
             let result = await downloads.getDurationInSeconds(fileName, bucketName);
             assert.deepStrictEqual(result, -0.001);
+
+            downloads.getDurationOfGetRequest.restore();
         });
 
         it('should return 0 on success', async () => {
@@ -123,7 +120,7 @@ describe('downloads', () => {
                 'fileName': '2mib.txt',
                 'timeTaken': '0.000',
                 'fileSizeBytes': '2097152',
-                'speedBps': 'Infinity', 
+                'speedBps': 'Infinity',
                 'speedMiBps': 'Infinity',
             }];
 
@@ -145,22 +142,26 @@ describe('downloads', () => {
         });
 
         it('should return an Array of an Object with bad values if GET request fails', async () => {
-            const fileName = 'wrongFile';
-            const bucketName = 'wrongBucket';
+            sinon.stub(downloads, 'getDurationOfGetRequest').callsFake(fakeGetDurationOfGetRequest)
+            
+            const fileName = '2mib.txt';
+            const bucketName = 'us-west1';
 
             let result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
             let expected = [{
-                'bucketName': 'wrongBucket',
-                'fileName': 'wrongFile',
-                'fileSizeBytes': 'wrongFile',
-                'location': 'wrongBucket',
-                'speedBps': '-1.000',
-                'speedMiBps': '-1.000',
+                'bucketName': 'us-west1',
+                'fileName': '2mib.txt',
+                'fileSizeBytes': '2097152',
+                'location': 'Oregon',
+                'speedBps': '-2097152000.000',
+                'speedMiBps': '-2000.000',
                 'timeTaken': '-0.001',
             }];
 
             assert.deepStrictEqual(result, expected);
+
+            downloads.getDurationOfGetRequest.restore();
         })
     });
 })

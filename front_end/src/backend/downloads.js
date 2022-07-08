@@ -55,15 +55,13 @@ export class Downloads {
      * @returns {number}
      */
     async getDurationInSeconds(fileName, bucket) {
-        if (fileName != 'wrongFile' && bucket != 'wrongBucket') {
-            if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
-                let errorMessage = `Invalid File Name: '${fileName}'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`
-                throw new Error(errorMessage);
-            }
-            if (!(bucket in REGIONS_MAP)) {
-                let errorMessage = `Invalid Bucket Name: '${bucket}'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`
-                throw new Error(errorMessage);
-            }
+        if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
+            let errorMessage = `Invalid File Name: '${fileName}'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`
+            throw new Error(errorMessage);
+        }
+        if (!(bucket in REGIONS_MAP)) {
+            let errorMessage = `Invalid Bucket Name: '${bucket}'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`
+            throw new Error(errorMessage);
         }
 
         const bucketName = `gcsrbpa-${bucket}`;
@@ -71,6 +69,7 @@ export class Downloads {
         const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
         const timeTaken = await this.getDurationOfGetRequest(URL);
+
         return timeTaken / 1000; // return in units of seconds
     }
 
