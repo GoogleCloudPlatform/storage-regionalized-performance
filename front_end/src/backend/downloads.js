@@ -25,14 +25,14 @@ export class Downloads {
     _builtURL;
 
     /**
-     * Measures time in milliseconds taken to download a file from a bucket to memory as specified by the input URL.
-     * Returns -1 if download fails so that a set of benchmarks may continue running even where one fails. 
+     * Measures time (in milliseconds) to download a file from a bucket to memory as specified by the input URL.
+     * Returns -1 if download fails. This is so that a sequence of benchmarks can continue running even where one fails. 
      * 
      * @private
      * @param {string} URL - URL to send HTTP GET request.
      * @returns {number}
      */
-    async downloadFile(URL) {
+    async getDurationOfGetRequest(URL) {
         this._builtURL = URL;
         try {
             const start = performance.now();
@@ -54,7 +54,7 @@ export class Downloads {
      * @param {string} bucket 
      * @returns {number}
      */
-    async timeDownload(fileName, bucket) {
+    async getDurationInSeconds(fileName, bucket) {
         if (fileName != 'wrongFile' && bucket != 'wrongBucket') {
             if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
                 let errorMessage = `Invalid File Name: '${fileName}'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`
@@ -70,7 +70,7 @@ export class Downloads {
 
         const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-        const timeTaken = await this.downloadFile(URL);
+        const timeTaken = await this.getDurationOfGetRequest(URL);
         return timeTaken / 1000; // return in units of seconds
     }
 
@@ -85,7 +85,7 @@ export class Downloads {
      * @returns {Object.<string, string>[]} 
      */
     async benchmarkSingleDownload(fileName, bucketName) {
-        const timeTaken = await this.timeDownload(fileName, bucketName);
+        const timeTaken = await this.getDurationInSeconds(fileName, bucketName);
 
         let fileSizeBytes = FILESIZE_BYTES[fileName] || fileName;
         let fileSizeMiB = FILESIZE_MIB[fileName] || fileName;

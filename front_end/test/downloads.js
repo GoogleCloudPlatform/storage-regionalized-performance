@@ -56,54 +56,56 @@ describe('downloads', () => {
         downloads = new Downloads();
     });
 
-    describe('downloadFile', () => {
+    describe('getDurationOfGetRequest', () => {
         it('should return -1 on failure of GET request', async () => {
             const URL = 'poorly_formed_URL';
-            const result = await downloads.downloadFile(URL);
+            const result = await downloads.getDurationOfGetRequest(URL);
             assert.deepStrictEqual(result, -1);
         });
 
         it('should return 0 on success', async () => {
             const URL = 'https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt';
-            const result = await downloads.downloadFile(URL);
+            const result = await downloads.getDurationOfGetRequest(URL);
             assert.deepStrictEqual(result, 0);
         });
     });
 
-    describe('timeDownload', () => {
+    describe('getDurationInSeconds', () => {
         it('should throw Error if bucketName is invalid', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'random_bucket_name';
 
-            await assert.rejects(downloads.timeDownload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
+            await assert.rejects(downloads.getDurationInSeconds(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
         });
 
         it('should throw Error if fileName is invalid', async () => {
             const fileName = 'random_file_name';
             const bucketName = 'us-west1';
 
-            await assert.rejects(downloads.timeDownload(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
+            await assert.rejects(downloads.getDurationInSeconds(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
         });
 
+        // downloads.downloadFile() returns -1 on failure, which is divided by 1000 to 
+        // convert from millisecs to seconds. -1/1000 = -0.001.
         it('should return -0.001 if GET request fails', async () => {
             const bucketName = 'wrongBucket';
             const fileName = 'wrongFile';
 
-            let result = await downloads.timeDownload(fileName, bucketName);
+            let result = await downloads.getDurationInSeconds(fileName, bucketName);
             assert.deepStrictEqual(result, -0.001);
         });
 
         it('should return 0 on success', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
-            const result = await downloads.timeDownload(fileName, bucketName);
+            const result = await downloads.getDurationInSeconds(fileName, bucketName);
             assert.deepStrictEqual(result, 0);
         });
 
         it('should build URL correctly', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
-            await downloads.timeDownload(fileName, bucketName);
+            await downloads.getDurationInSeconds(fileName, bucketName);
             assert.deepStrictEqual(downloads._builtURL, `https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`);
         });
     });
