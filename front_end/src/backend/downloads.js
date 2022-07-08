@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-// In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
+// In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'.
 import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from './common.js';
 import axios from 'axios';
 
+/**
+ * Measure time to download files from a bucket to memory and get relevant benchmarks.
+ */
 export class Downloads {
     _builtURL;
-
+    
+    /**
+     * Measures time in milliseconds taken to download a file from a bucket to memory as specified by the input URL.
+     * Returns -1 if download fails. 
+     * 
+     * @private
+     * @param {string} URL - URL to send HTTP GET request.
+     * @returns {number}
+     */
     async downloadFile(URL) {
         this._builtURL = URL;
         try {
@@ -32,6 +43,17 @@ export class Downloads {
         }
     }
 
+    /**
+     * This function constructs a URL of the file to be downloaded. 
+     * Returns elapsed time converted from milliseconds to seconds. 
+     * 
+     * @throws {Error} If fileName is not one of enum values in FILESIZES_NAMES defined in common.js.
+     * @throws {Error} If bucket is not one of the enum values in REGIONS_MAP defined in common.js.
+     * 
+     * @param {string} fileName 
+     * @param {string} bucket 
+     * @returns {number}
+     */
     async timeDownload(fileName, bucket) {
         if (fileName != 'wrongFile' && bucket != 'wrongBucket') {
             if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
@@ -52,6 +74,14 @@ export class Downloads {
         return timeTaken / 1000; // return in units of seconds
     }
 
+    /**
+     * Runs download benchmark and returns a HashMap with keys 'bucketName', 'location', 'fileName', 
+     * 'timeTaken', 'fileSizeBytes', 'speedBps', 'speedMiBps'. HashMap values are stringified results.
+     * 
+     * @param {string} fileName 
+     * @param {string} bucketName 
+     * @returns {Map.<string, string>}
+     */
     async benchmarkSingleDownload(fileName, bucketName) {
         let result = new Map();
         const timeTaken = await this.timeDownload(fileName, bucketName);
@@ -74,6 +104,13 @@ export class Downloads {
         return result;
     }
 
+    /**
+     * Runs download benchmark and returns HashMap of results wrapped in an Array.
+     * 
+     * @param {string} fileName 
+     * @param {string} bucketName 
+     * @returns {Map.<string, string>[]}
+     */
     async benchmarkDownload(fileName, bucketName) {
         const result = await this.benchmarkSingleDownload(fileName, bucketName);
 

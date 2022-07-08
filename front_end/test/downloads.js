@@ -21,7 +21,7 @@ import axios from 'axios';
 import { describe, it } from 'mocha';
 
 async function fakeAxiosGet(URL) {
-    // Use a specific "wrong URL" to mimic a GET request failing. Return -1 as specified in downloads.js
+    // Use a specific 'wrong URL' to mimic a GET request failing. Return -1 as specified in downloads.js
     const wrongURL = `https://storage.googleapis.com/wrongBucket/wrongFile`;
     if (URL == wrongURL) {
         return -1;
@@ -179,7 +179,7 @@ describe('downloads', () => {
             const bucketName = 'us-west1';
 
             let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = [{"bucketName":"us-west1","location":"Oregon","fileName":"2mib.txt","timeTaken":"0.000","fileSizeBytes":2097152,"speedBps":"Infinity","speedMiBps":"Infinity"}];
+            let expected = [{ 'bucketName': 'us-west1', 'location': 'Oregon', 'fileName': '2mib.txt', 'timeTaken': '0.000', 'fileSizeBytes': 2097152, 'speedBps': 'Infinity', 'speedMiBps': 'Infinity' }];
 
             assert.deepStrictEqual(result, expected);
         });
@@ -189,7 +189,7 @@ describe('downloads', () => {
             const bucketName = 'wrongBucket';
 
             let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = [{"bucketName":"wrongBucket","location":"wrongBucket","fileName":"wrongFile","timeTaken":"-0.001","fileSizeBytes":"wrongFile","speedBps":"-1.000","speedMiBps":"-1.000"}];
+            let expected = [{ 'bucketName': 'wrongBucket', 'location': 'wrongBucket', 'fileName': 'wrongFile', 'timeTaken': '-0.001', 'fileSizeBytes': 'wrongFile', 'speedBps': '-1.000', 'speedMiBps': '-1.000' }];
 
             assert.deepStrictEqual(result, expected);
         })
