@@ -109,19 +109,21 @@ describe('downloads', () => {
     });
 
     describe('benchmarkSingleDownload', () => {
-        it('should return a Map object on success', async () => {
+        it('should return an Array of an Object on success', async () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
             const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
-            let expected = new Map();
-            expected.set('bucketName', 'us-west1');
-            expected.set('location', 'Oregon');
-            expected.set('fileName', '2mib.txt');
-            expected.set('timeTaken', '0.000');
-            expected.set('fileSizeBytes', 2097152);
-            expected.set('speedBps', 'Infinity');
-            expected.set('speedMiBps', 'Infinity');
+            // SpeedBps and SpeedMiBps are set to 'Infinity' because of the division by 0. 
+            let expected = [{
+                'bucketName': 'us-west1',
+                'location': 'Oregon',
+                'fileName': '2mib.txt',
+                'timeTaken': '0.000',
+                'fileSizeBytes': '2097152',
+                'speedBps': 'Infinity', 
+                'speedMiBps': 'Infinity',
+            }];
 
             assert.deepStrictEqual(result, expected);
         });
@@ -140,56 +142,21 @@ describe('downloads', () => {
             await assert.rejects(downloads.benchmarkSingleDownload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
         });
 
-        it('should return Map with bad values if GET request fails', async () => {
+        it('should return an Array of an Object with bad values if GET request fails', async () => {
             const fileName = 'wrongFile';
             const bucketName = 'wrongBucket';
 
             let result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
-            let expected = new Map();
-            expected.set('bucketName', 'wrongBucket');
-            expected.set('fileName', 'wrongFile');
-            expected.set('fileSizeBytes', 'wrongFile');
-            expected.set('location', 'wrongBucket');
-            expected.set('speedBps', '-1.000');
-            expected.set('speedMiBps', '-1.000');
-            expected.set('timeTaken', '-0.001');
-
-            assert.deepStrictEqual(result, expected);
-        })
-    });
-
-    describe('benchmarkDownload', () => {
-        it('should throw Error if fileName is invalid', async () => {
-            const fileName = 'random_file_name';
-            const bucketName = 'us-west1';
-
-            await assert.rejects(downloads.benchmarkDownload(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
-        });
-
-        it('should throw Error if bucketName is invalid', async () => {
-            const fileName = '2mib.txt';
-            const bucketName = 'random_bucket_name';
-
-            await assert.rejects(downloads.benchmarkDownload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
-        });
-
-        it('should return JSON String on success', async () => {
-            const fileName = '2mib.txt';
-            const bucketName = 'us-west1';
-
-            let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = [{ 'bucketName': 'us-west1', 'location': 'Oregon', 'fileName': '2mib.txt', 'timeTaken': '0.000', 'fileSizeBytes': 2097152, 'speedBps': 'Infinity', 'speedMiBps': 'Infinity' }];
-
-            assert.deepStrictEqual(result, expected);
-        });
-
-        it('should return JSON String with default values if GET request fails', async () => {
-            const fileName = 'wrongFile';
-            const bucketName = 'wrongBucket';
-
-            let result = await downloads.benchmarkDownload(fileName, bucketName);
-            let expected = [{ 'bucketName': 'wrongBucket', 'location': 'wrongBucket', 'fileName': 'wrongFile', 'timeTaken': '-0.001', 'fileSizeBytes': 'wrongFile', 'speedBps': '-1.000', 'speedMiBps': '-1.000' }];
+            let expected = [{
+                'bucketName': 'wrongBucket',
+                'fileName': 'wrongFile',
+                'fileSizeBytes': 'wrongFile',
+                'location': 'wrongBucket',
+                'speedBps': '-1.000',
+                'speedMiBps': '-1.000',
+                'timeTaken': '-0.001',
+            }];
 
             assert.deepStrictEqual(result, expected);
         })

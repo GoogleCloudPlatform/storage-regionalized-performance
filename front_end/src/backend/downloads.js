@@ -23,7 +23,7 @@ import axios from 'axios';
  */
 export class Downloads {
     _builtURL;
-    
+
     /**
      * Measures time in milliseconds taken to download a file from a bucket to memory as specified by the input URL.
      * Returns -1 if download fails so that a set of benchmarks may continue running even where one fails. 
@@ -75,17 +75,16 @@ export class Downloads {
     }
 
     /**
-     * Runs download benchmark and returns a HashMap with keys 'bucketName', 'location', 'fileName', 
+     * Runs download benchmark and returns an Array of an Object keys 'bucketName', 'location', 'fileName', 
      * 'timeTaken', 'fileSizeBytes', 'speedBps', 'speedMiBps'. 
      * All numerical results are rounded to three decimal places.
-     * All HashMap values are strings.
+     * All Object values are strings.
      * 
      * @param {string} fileName 
      * @param {string} bucketName 
-     * @returns {Map.<string, string>}
+     * @returns {Object.<string, string>[]} 
      */
     async benchmarkSingleDownload(fileName, bucketName) {
-        let result = new Map();
         const timeTaken = await this.timeDownload(fileName, bucketName);
 
         let fileSizeBytes = FILESIZE_BYTES[fileName] || fileName;
@@ -95,29 +94,16 @@ export class Downloads {
         const speedBps = (fileSizeBytes / timeTaken) || -1;
         const speedMiBps = (fileSizeMiB / timeTaken) || -1;
 
-        result.set('bucketName', bucketName);
-        result.set('location', location);
-        result.set('fileName', fileName);
-        result.set('timeTaken', timeTaken.toFixed(3));
-        result.set('fileSizeBytes', fileSizeBytes);
-        result.set('speedBps', speedBps.toFixed(3));
-        result.set('speedMiBps', speedMiBps.toFixed(3));
+        let result = [{
+            'bucketName': bucketName,
+            'location': location,
+            'fileName': fileName,
+            'timeTaken': timeTaken.toFixed(3),
+            'fileSizeBytes': String(fileSizeBytes),
+            'speedBps': speedBps.toFixed(3),
+            'speedMiBps': speedMiBps.toFixed(3),
+        }]
 
         return result;
-    }
-
-    /**
-     * Runs download benchmark and returns Object representation of results wrapped in an Array.
-     * 
-     * @param {string} fileName 
-     * @param {string} bucketName 
-     * @returns {Array.<Object.<string, string>>}
-     */
-    async benchmarkDownload(fileName, bucketName) {
-        const result = await this.benchmarkSingleDownload(fileName, bucketName);
-
-        let arr = new Array();
-        arr.push(Object.fromEntries(result));
-        return arr;
     }
 }
