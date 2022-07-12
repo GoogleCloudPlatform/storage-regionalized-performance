@@ -16,9 +16,15 @@
 
 <template>
   <div>
-    <button class="btn" @click="reloadDownloads('2mib')">2MiB</button>
-    <button class="btn" @click="reloadDownloads('64mib')">64MiB</button>
-    <button class="btn" @click="reloadDownloads('256mib')">256MiB</button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.small)">
+      2MiB
+    </button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.medium)">
+      64MiB
+    </button>
+    <button class="btn" @click="reloadDownloads(FILESIZES_NAMES.large)">
+      256MiB
+    </button>
     <ProgressBar :progressWidth="progressBarWidth" />
     <ResultsTable :results="results" ref="resultsTable" />
   </div>
@@ -26,38 +32,39 @@
 
 
 <script>
-import ResultsTable from "@/components/ResultsTable";
-import ProgressBar from "../components/ProgressBar";
-const downloads = require("@/backend/downloads");
+import ResultsTable from '@/components/ResultsTable';
+import ProgressBar from '../components/ProgressBar';
+import { Downloads } from '@/backend/downloads';
+import { REGIONS_MAP, FILESIZES_NAMES } from '@/backend/common';
 
-let currentFileSize = "2mib";
-const REGIONS_MAP = downloads.REGIONS_MAP;
+let currentFileSize = FILESIZES_NAMES.small;
 let progressBarCount = 0;
 
 export default {
-  name: "DownloadsView",
+  name: 'DownloadsView',
   data() {
     return {
       results: [],
       currentFileSize: currentFileSize,
-      progressBarWidth: "0%",
+      progressBarWidth: '0%',
+      FILESIZES_NAMES: FILESIZES_NAMES,
     };
   },
   methods: {
-    async reloadDownloads(fileSize = "2mib") {
+    async reloadDownloads(fileSize = FILESIZES_NAMES.small) {
       currentFileSize = fileSize.toString();
-
       //reset progress bar
       progressBarCount = 0;
-      this.progressBarWidth = progressBarCount.toString() + "%";
+      this.progressBarWidth = progressBarCount.toString() + '%';
 
       this.results = [];
-      const fileName = currentFileSize + ".txt";
+      const fileName = currentFileSize;
 
+      let downloads = new Downloads();
       for (let bucketName in REGIONS_MAP) {
         try {
-          let result = await downloads.benchmarkDownload(fileName, bucketName);
-          this.results = this.results.concat(JSON.parse(result));
+          let result = await downloads.benchmarkSingleDownload(fileName, bucketName);
+          this.results = this.results.concat(result);
           this.results = this.results.sort((a, b) => {
             if (a.timeTaken < b.timeTaken) {
               return -1;
@@ -68,15 +75,14 @@ export default {
           });
 
           //Updating progress bar
-          let aux = new Object(REGIONS_MAP);
-          let incrementSize = 100 * (1 / Object.keys(aux).length);
-          progressBarCount += incrementSize;
-          this.progressBarWidth = progressBarCount.toString() + "%";
+          progressBarCount =
+            100 * (this.results.length / Object.keys(REGIONS_MAP).length);
+          this.progressBarWidth = progressBarCount.toString() + '%';
 
-          console.log("Downloads Success! ^_^");
+          console.log('Downloads Success! ^_^');
         } catch (e) {
           console.log(e);
-          console.log("Downloads Failed! :(");
+          console.log('Downloads Failed! :(');
         }
       }
     },

@@ -14,98 +14,93 @@
  * limitations under the License.
  */
 
-// In these functions the 'fileName' parameter letiables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'
-export const REGIONS_MAP = {
-    "northamerica-northeast1":"Montréal",
-    "northamerica-northeast2":"Toronto",
-    "us-central1":"Iowa",
-    "us-east1":"South Carolina",
-    "us-east4":"Northern Virginia",
-    "us-east5":"Columbus",
-    "us-south1":"Dallas",
-    "us-west1":"Oregon",
-    "us-west2":"Los Angeles",
-    "us-west3":"Salt Lake City",
-    "us-west4":"Las Vegas",
-    "southamerica-east1":"São Paulo",
-    "southamerica-west1":"Santiago",
-    "europe-central2":"Warsaw",
-    "europe-north1":"Finland",
-    "europe-southwest1":"Madrid",
-    "europe-west1":"Belgium",
-    "europe-west2":"London",
-    "europe-west3":"Frankfurt",
-    "europe-west4":"Netherlands",
-    "europe-west6":"Zürich",
-    "europe-west8":"Milan",
-    "europe-west9":"Paris",
-    "asia-east1":"Taiwan",
-    "asia-east2":"Hong Kong",
-    "asia-northeast1":"Tokyo",
-    "asia-northeast2":"Osaka",
-    "asia-northeast3":"Seoul",
-    "asia-south1":"Mumbai",
-    "asia-south2":"Delhi",
-    "asia-southeast1":"Singapore",
-    "asia-southeast2":"Jakarta",
-    "australia-southeast1":"Sydney",
-    "australia-southeast2":"Melbourne"
-};
+// In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'.
+import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from './common.js';
+import axios from 'axios';
 
+/**
+ * Measure time to download files from a bucket to memory and get relevant benchmarks.
+ */
+export class Downloads {
+    _builtURL;
 
-async function timeDownload(fileName, bucket) {
-    const axios = require('axios');
-    const bucketName = 'gcsrbpa-' + bucket;
-
-    const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
-
-    async function downloadFile() {
-        const start = Date.now();
-        await axios.get(URL)
-        const end = Date.now() - start;
-        return end;
+    /**
+     * Measures time (in milliseconds) to download a file from a bucket to memory as specified by the input URL.
+     * 
+     * @private
+     * @param {string} URL - URL to send HTTP GET request.
+     * @returns {number} -1 if download fails - so that a sequence of benchmarks can continue running even if one fails. 
+     */
+    async getDurationOfGetRequest(URL) {
+        this._builtURL = URL;
+        try {
+            const start = performance.now();
+            await axios.get(URL);
+            return performance.now() - start;
+        } catch (e) {
+            return -1;
+        }
     }
 
-    const timeTaken = await downloadFile();
-    return timeTaken / 1000; // return in units of seconds
-}
+    /**
+     * This function constructs a URL of the file to be downloaded. 
+     * 
+     * @throws {Error} If fileName is not one of enum values in FILESIZES_NAMES defined in common.js.
+     * @throws {Error} If bucket is not one of the enum values in REGIONS_MAP defined in common.js.
+     * 
+     * @param {string} fileName 
+     * @param {string} bucket 
+     * @returns {number} Returns elapsed time converted from milliseconds to seconds. 
+     */
+    async getDurationInSeconds(fileName, bucket) {
+        if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
+            let errorMessage = `Invalid File Name: '${fileName}'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`
+            throw new Error(errorMessage);
+        }
+        if (!(bucket in REGIONS_MAP)) {
+            let errorMessage = `Invalid Bucket Name: '${bucket}'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`
+            throw new Error(errorMessage);
+        }
 
-async function benchmarkSingleDownload(fileName, bucketName) {
-    let result = new Map();
-    const timeTaken = await timeDownload(fileName, bucketName);
+        const bucketName = `gcsrbpa-${bucket}`;
 
-    let fileSizeBytes = 0;
-    let fileSizeMiB = 0;
-    if (fileName == '2mib.txt') {
-        fileSizeBytes = 2097152;
-        fileSizeMiB = 2;
-    } else if (fileName == '64mib.txt') {
-        fileSizeBytes = 67108864;
-        fileSizeMiB = 64;
-    } else if (fileName == '256mib.txt') {
-        fileSizeBytes = 268435456;
-        fileSizeMiB = 256;
+        const URL = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+
+        const timeTaken = await this.getDurationOfGetRequest(URL);
+
+        return timeTaken / 1000; // return in units of seconds
     }
-    const speedBps = fileSizeBytes / timeTaken;
-    const speedMiBps = fileSizeMiB / timeTaken;
 
-    result.set('bucketName', bucketName);
-    result.set('location', REGIONS_MAP[bucketName]);
-    result.set('fileName', fileName);
-    result.set('timeTaken', timeTaken);
-    result.set('fileSizeBytes', fileSizeBytes.toString());
-    result.set('speedBps', speedBps.toFixed(3));
-    result.set('speedMiBps', speedMiBps.toFixed(3));
+    /**
+     * Runs download benchmark and returns an Array of an Object keys 'bucketName', 'location', 'fileName', 
+     * 'timeTaken', 'fileSizeBytes', 'speedBps', 'speedMiBps'. 
+     * All numerical results are rounded to three decimal places.
+     * All Object values are strings.
+     * 
+     * @param {string} fileName 
+     * @param {string} bucketName 
+     * @returns {Object.<string, string>[]} 
+     */
+    async benchmarkSingleDownload(fileName, bucketName) {
+        const timeTaken = await this.getDurationInSeconds(fileName, bucketName);
 
-    return result;
-}
+        let fileSizeBytes = FILESIZE_BYTES[fileName] || fileName;
+        let fileSizeMiB = FILESIZE_MIB[fileName] || fileName;
+        let location = REGIONS_MAP[bucketName] || bucketName;
 
-export async function benchmarkDownload(fileName, bucketName) {
-    const result = await benchmarkSingleDownload(fileName, bucketName, REGIONS_MAP);
+        const speedBps = (fileSizeBytes / timeTaken) || -1;
+        const speedMiBps = (fileSizeMiB / timeTaken) || -1;
 
-    console.log(`Completed Downloads Benchmark for ${bucketName}`);
+        let result = [{
+            'bucketName': bucketName,
+            'location': location,
+            'fileName': fileName,
+            'timeTaken': timeTaken.toFixed(3),
+            'fileSizeBytes': String(fileSizeBytes),
+            'speedBps': speedBps.toFixed(3),
+            'speedMiBps': speedMiBps.toFixed(3),
+        }]
 
-    let arr = new Array()
-    arr.push(Object.fromEntries(result))
-    return JSON.stringify(arr);
+        return result;
+    }
 }
