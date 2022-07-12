@@ -26,11 +26,10 @@ export class Downloads {
 
     /**
      * Measures time (in milliseconds) to download a file from a bucket to memory as specified by the input URL.
-     * Returns -1 if download fails. This is so that a sequence of benchmarks can continue running even where one fails. 
      * 
      * @private
      * @param {string} URL - URL to send HTTP GET request.
-     * @returns {number}
+     * @returns {number} -1 if download fails - so that a sequence of benchmarks can continue running even if one fails. 
      */
     async getDurationOfGetRequest(URL) {
         this._builtURL = URL;
@@ -45,14 +44,13 @@ export class Downloads {
 
     /**
      * This function constructs a URL of the file to be downloaded. 
-     * Returns elapsed time converted from milliseconds to seconds. 
      * 
      * @throws {Error} If fileName is not one of enum values in FILESIZES_NAMES defined in common.js.
      * @throws {Error} If bucket is not one of the enum values in REGIONS_MAP defined in common.js.
      * 
      * @param {string} fileName 
      * @param {string} bucket 
-     * @returns {number}
+     * @returns {number} Returns elapsed time converted from milliseconds to seconds. 
      */
     async getDurationInSeconds(fileName, bucket) {
         if (!(fileName in FILESIZE_BYTES) || !(fileName in FILESIZE_MIB)) {
