@@ -18,6 +18,11 @@
 import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from './common.js';
 import axios from 'axios';
 
+// Just something to test if webpack is configured correctly.
+import {Storage} from '@google-cloud/storage';
+const storage = new Storage();
+storage;
+
 /**
  * Measure time to download files from a bucket to memory and get relevant benchmarks.
  */

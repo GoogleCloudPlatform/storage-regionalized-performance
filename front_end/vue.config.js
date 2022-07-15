@@ -16,5 +16,25 @@
 
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
-  transpileDependencies: true
+  transpileDependencies: true,
+  configureWebpack: {
+    resolve: {
+      preferRelative: true,
+      fallback: {
+        "fs": false,
+        "child_process": false,
+        "net": false,
+        "tls": false,
+        "assert": require.resolve("assert"),
+        "stream": require.resolve("stream-browserify"),
+        "path": require.resolve("path-browserify"),
+        "crypto": require.resolve("crypto-browserify"),
+        "zlib": require.resolve("browserify-zlib"),
+        "https": require.resolve("https-browserify"),
+        "os": require.resolve("os-browserify/browser"),
+        "http": require.resolve("stream-http")
+      },
+    }
+
+  }
 })
