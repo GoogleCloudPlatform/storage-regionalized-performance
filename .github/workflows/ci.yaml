@@ -4,6 +4,9 @@ on:
       - main
   pull_request:
 name: ci
+defaults:
+  run:
+    working-directory: front-end/
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      - run: node --version
+      - run: node --version\
       # The first installation step ensures that all of our production
       # dependencies work on the given Node.js version, this helps us find
       # dependencies that don't match our engines field:
@@ -46,15 +49,3 @@ jobs:
           node-version: 14
       - run: npm install
       - run: npm run lint
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-      - run: npm install
-      - run: npm run docs
-      - uses: JustinBeckwith/linkinator-action@v1
-        with:
-          paths: docs/
