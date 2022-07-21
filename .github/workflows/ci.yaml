@@ -6,7 +6,7 @@ on:
 name: ci
 defaults:
   run:
-    working-directory: front-end/
+    working-directory: front_end/
 jobs:
   test:
     runs-on: ubuntu-latest
