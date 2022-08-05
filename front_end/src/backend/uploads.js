@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from './common';
+import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB, FLOAT_ROUND_DIGITS, DEFAULT_TIME_TAKEN } from './common';
 
 /**
  * Strings of fixed length to be used as contents of an 
@@ -49,6 +49,7 @@ export class Uploads {
      * @returns {string} Returns a signed URL.
      */
     async getSignedURL(fileName, bucketName) {
+        // The signed URL Source is set to localhost now, but will either use env variables or another website during deployment
         const signedUrlSource = `http://localhost:3000/${bucketName}/${fileName}`;
 
         const axiosOptions = {
@@ -102,12 +103,13 @@ export class Uploads {
             maxBodyLength: Infinity
         };
 
-        let timeTakenMilliSeconds = -1;
+        let timeTakenMilliSeconds = DEFAULT_TIME_TAKEN;
         try {
             let start = performance.now();
             await axios(axiosOptions)
             timeTakenMilliSeconds = performance.now() - start;
         } catch (e) {
+            // Error is logged without further handling for now - this will be extended with retries/other handling in the future.
             console.log(e);
         }
 
@@ -131,17 +133,17 @@ export class Uploads {
         let fileSizeMiB = FILESIZE_MIB[fileName] || fileName;
         let location = REGIONS_MAP[bucketName] || bucketName;
 
-        const speedBps = (fileSizeBytes / timeTaken) || -1;
-        const speedMiBps = (fileSizeMiB / timeTaken) || -1;
+        const speedBps = (fileSizeBytes / timeTaken) || DEFAULT_TIME_TAKEN;
+        const speedMiBps = (fileSizeMiB / timeTaken) || DEFAULT_TIME_TAKEN;
 
         let result = [{
             'bucketName': bucketName,
             'location': location,
             'fileName': fileName,
-            'timeTaken': timeTaken.toFixed(3),
+            'timeTaken': timeTaken.toFixed(FLOAT_ROUND_DIGITS),
             'fileSizeBytes': String(fileSizeBytes),
-            'speedBps': speedBps.toFixed(3),
-            'speedMiBps': speedMiBps.toFixed(3),
+            'speedBps': speedBps.toFixed(FLOAT_ROUND_DIGITS),
+            'speedMiBps': speedMiBps.toFixed(FLOAT_ROUND_DIGITS),
         }]
 
         return result;

@@ -21,6 +21,9 @@ const PORT = 3000;
 
 const app = express();
 
+const URL_EXPIRATION_TIME_INTERVAL = 15 * 60 * 1000; //15 minutes
+const RANDOM_BYTES_LENGTH = 20;
+
 /**
  * Sizes of files in each bucket and their associated size in bytes
  * @enum {number}
@@ -61,13 +64,13 @@ app.get('/:bucketName/:fileToUpload', async (req, res) => {
     const storage = new Storage();
 
     // Append 40 random characters to the filename so that the same file can be uploaded simultaneously
-    const uploadFileName = `${fileToUpload}-${crypto.randomBytes(20).toString('hex')}`;
+    const uploadFileName = `${fileToUpload}-${crypto.randomBytes(RANDOM_BYTES_LENGTH).toString('hex')}`;
     console.log(`${fileToUpload} to be uploaded as ${uploadFileName} to bucket ${bucketName}`)
 
     const options = {
         version: 'v4',
         action: 'write',
-        expires: Date.now() + 15 * 60 * 1000,
+        expires: Date.now() + URL_EXPIRATION_TIME_INTERVAL, 
         contentType: 'text/plain',
         contentMd5: MD5_SUMS[fileToUpload],
         extensionHeaders: {

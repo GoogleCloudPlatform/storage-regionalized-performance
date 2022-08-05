@@ -86,3 +86,15 @@ export const FILESIZE_MIB = Object.freeze({
     [FILESIZES_NAMES.medium]: 64,
     [FILESIZES_NAMES.large]: 256
 });
+
+/**
+ * The number of decimal places to round float values to when returning benchmark results
+ * @const {number}
+ */
+export const FLOAT_ROUND_DIGITS = 3;
+
+/**
+ * The default time taken to return for a benchmark
+ * @const {number}
+ */
+export const DEFAULT_TIME_TAKEN = -1;
