@@ -15,7 +15,7 @@
  */
 
 // In these functions the 'fileName' parameter variables refer to filenames of '2mib.txt' '64mib.txt' and '256mib.txt'.
-import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB } from './common.js';
+import { REGIONS_MAP, FILESIZE_BYTES, FILESIZE_MIB, DEFAULT_TIME_TAKEN, FLOAT_ROUND_DIGITS } from './common.js';
 import axios from 'axios';
 
 /**
@@ -38,7 +38,7 @@ export class Downloads {
             await axios.get(URL);
             return performance.now() - start;
         } catch (e) {
-            return -1;
+            return DEFAULT_TIME_TAKEN;
         }
     }
 
@@ -88,17 +88,17 @@ export class Downloads {
         let fileSizeMiB = FILESIZE_MIB[fileName] || fileName;
         let location = REGIONS_MAP[bucketName] || bucketName;
 
-        const speedBps = (fileSizeBytes / timeTaken) || -1;
-        const speedMiBps = (fileSizeMiB / timeTaken) || -1;
+        const speedBps = (fileSizeBytes / timeTaken) || DEFAULT_TIME_TAKEN;
+        const speedMiBps = (fileSizeMiB / timeTaken) || DEFAULT_TIME_TAKEN;
 
         let result = [{
             'bucketName': bucketName,
             'location': location,
             'fileName': fileName,
-            'timeTaken': timeTaken.toFixed(3),
+            'timeTaken': timeTaken.toFixed(FLOAT_ROUND_DIGITS),
             'fileSizeBytes': String(fileSizeBytes),
-            'speedBps': speedBps.toFixed(3),
-            'speedMiBps': speedMiBps.toFixed(3),
+            'speedBps': speedBps.toFixed(FLOAT_ROUND_DIGITS),
+            'speedMiBps': speedMiBps.toFixed(FLOAT_ROUND_DIGITS),
         }]
 
         return result;

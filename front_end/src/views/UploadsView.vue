@@ -16,6 +16,79 @@
 
 <template>
   <div>
-    <h1>Uploads Placeholder</h1>
+    <button class="btn" @click="reloadUploads(FILESIZES_NAMES.small)">
+      2MiB
+    </button>
+    <button class="btn" @click="reloadUploads(FILESIZES_NAMES.medium)">
+      64MiB
+    </button>
+    <button class="btn" @click="reloadUploads(FILESIZES_NAMES.large)">
+      256MiB
+    </button>
+    <ProgressBar :progressWidth="progressBarWidth" />
+    <ResultsTable :results="results" ref="resultsTable" />
   </div>
 </template>
+
+
+<script>
+import ResultsTable from '@/components/ResultsTable';
+import ProgressBar from '../components/ProgressBar';
+import { Uploads } from '@/backend/uploads';
+import { REGIONS_MAP, FILESIZES_NAMES } from '@/backend/common';
+
+let currentFileSize = FILESIZES_NAMES.small;
+let progressBarCount = 0;
+
+export default {
+  name: 'UploadsView',
+  data() {
+    return {
+      results: [],
+      currentFileSize: currentFileSize,
+      progressBarWidth: '0%',
+      FILESIZES_NAMES: FILESIZES_NAMES,
+    };
+  },
+  methods: {
+    async reloadUploads(fileSize = FILESIZES_NAMES.small) {
+      currentFileSize = fileSize.toString();
+      //reset progress bar
+      progressBarCount = 0;
+      this.progressBarWidth = progressBarCount.toString() + '%';
+
+      this.results = [];
+      const fileName = currentFileSize;
+
+      let uploads = new Uploads();
+      for (let bucketName in REGIONS_MAP) {
+        try {
+          let result = await uploads.benchmarkSingleUpload(fileName, bucketName);
+          this.results = this.results.concat(result);
+          this.results = this.results.sort((a, b) => {
+            if (a.timeTaken < b.timeTaken) {
+              return -1;
+            } else if (a.timeTaken > b.timeTaken) {
+              return 1;
+            }
+            return 0;
+          });
+
+          //Updating progress bar
+          progressBarCount =
+            100 * (this.results.length / Object.keys(REGIONS_MAP).length);
+          this.progressBarWidth = progressBarCount.toString() + '%';
+
+        } catch (e) {
+          // Error is logged without further handling for now - this will be extended with retries/other handling in the future.
+          console.error(e);
+        }
+      }
+    },
+  },
+  async created() {
+    await this.reloadUploads();
+  },
+  components: { ResultsTable, ProgressBar },
+};
+</script>

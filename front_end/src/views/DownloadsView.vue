@@ -79,10 +79,9 @@ export default {
             100 * (this.results.length / Object.keys(REGIONS_MAP).length);
           this.progressBarWidth = progressBarCount.toString() + '%';
 
-          console.log('Downloads Success! ^_^');
         } catch (e) {
-          console.log(e);
-          console.log('Downloads Failed! :(');
+          // Error is logged without further handling for now - this will be extended with retries/other handling in the future.
+          console.error(e);
         }
       }
     },
