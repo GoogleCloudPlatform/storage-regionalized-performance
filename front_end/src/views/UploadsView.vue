@@ -81,7 +81,7 @@ export default {
 
         } catch (e) {
           // Error is logged without further handling for now - this will be extended with retries/other handling in the future.
-          console.log(e);
+          console.error(e);
         }
       }
     },
