@@ -42,7 +42,7 @@
  describe('downloads', () => {
      let downloads;
      sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
-     sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
+     let spyAxiosGetRequest = sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
  
      beforeEach(() => {
          downloads = new Downloads();
@@ -106,7 +106,9 @@
              const fileName = '2mib.txt';
              const bucketName = 'us-west1';
              await downloads.getDurationInSeconds(fileName, bucketName);
-             assert.deepStrictEqual(downloads._builtURL, `https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`);
+
+             let calledWith = spyAxiosGetRequest.args
+             assert.deepStrictEqual(calledWith[calledWith.length-1], [`https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`]);
          });
      });
  

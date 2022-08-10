@@ -46,11 +46,12 @@ function fakePerformanceNow() {
     return 1;
 }
 
-//@TODO: Verify that I'm correctly testing all behaviours, side effects and situations!
 describe('uploads', () => {
     let uploads;
     beforeEach(() => {
         uploads = new Uploads();
+        //@NOTE: Note all tests require this stub, take it out of the beforeEach()
+        sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
     });
 
     afterEach(() => {
@@ -62,9 +63,9 @@ describe('uploads', () => {
             let spyAxiosGetMethod = sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
             const fileName = 'random_file_name';
             const bucketName = 'random_bucket_name';
-            
+
             await uploads.getSignedURL(fileName, bucketName);
-            
+
             assert.deepStrictEqual(spyAxiosGetMethod.args[0], [`http://localhost:3000/${bucketName}/${fileName}`]);
         });
 
@@ -72,7 +73,7 @@ describe('uploads', () => {
             sinon.stub(axios, 'get').callsFake(FakeAxiosGetFailure);
             const fileName = 'random_file_name';
             const bucketName = 'random_bucket_name';
-            
+
             await assert.rejects(uploads.getSignedURL(fileName, bucketName), { message: `Failed to reach server to get signedURL: Error: Axios Get Request Failed` });
         });
     });
@@ -134,7 +135,6 @@ describe('uploads', () => {
         it('should return 0 on success', async () => {
             sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
             sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
-            sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
 
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
@@ -170,16 +170,62 @@ describe('uploads', () => {
             await assert.rejects(uploads.benchmarkSingleUpload(fileName, bucketName), { message: ERR_MSG_INVALID_BUCKET });
         });
 
-        // it('should return an Array of an Object with bad values if PUT request fails', async () => {
+        it('should return an Array of an Object with bad values if PUT request fails', async () => {
+            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
+            sinon.stub(axios, 'put').callsFake(FakeAxiosPutFailure);
 
-        // });
+            let expected = [
+                {
+                    bucketName: 'us-west1',
+                    location: 'Oregon',
+                    fileName: '2mib.txt',
+                    timeTaken: '-0.001',
+                    fileSizeBytes: '2097152',
+                    speedBps: '-2097152000.000',
+                    speedMiBps: '-2000.000'
+                }
+            ];
 
-        // it('should throw error when request for signed URL fails', async () => {
+            const fileName = '2mib.txt';
+            const bucketName = 'us-west1';
 
-        // });
+            let actual = await uploads.benchmarkSingleUpload(fileName, bucketName);
 
-        // it('should return an Array of an Object on success', async () => {
+            assert.deepStrictEqual(actual, expected);
+        });
 
-        // });
+        it('should throw error when request for signed URL fails', async () => {
+            sinon.stub(axios, 'get').callsFake(FakeAxiosGetFailure);
+            sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
+
+            const fileName = '2mib.txt';
+            const bucketName = 'us-west1';
+
+            await assert.rejects(uploads.benchmarkSingleUpload(fileName, bucketName), { message: 'Failed to reach server to get signedURL: Error: Axios Get Request Failed' });
+        });
+
+        it('should return an Array of an Object on success', async () => {
+            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
+            sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
+
+            let expected = [
+                {
+                    bucketName: 'us-west1',
+                    location: 'Oregon',
+                    fileName: '2mib.txt',
+                    timeTaken: '0.000',
+                    fileSizeBytes: '2097152',
+                    speedBps: 'Infinity',
+                    speedMiBps: 'Infinity'
+                }
+            ];
+
+            const fileName = '2mib.txt';
+            const bucketName = 'us-west1';
+
+            let actual = await uploads.benchmarkSingleUpload(fileName, bucketName);
+
+            assert.deepStrictEqual(actual, expected);
+        });
     });
 });
