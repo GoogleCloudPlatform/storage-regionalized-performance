@@ -30,7 +30,7 @@
      }
  }
  
- function fakeDateNow() {
+ function fakePerformanceNow() {
      return 1;
  }
  
@@ -41,12 +41,16 @@
  
  describe('downloads', () => {
      let downloads;
-     sinon.stub(performance, 'now').callsFake(fakeDateNow);
+     sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
      sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
  
      beforeEach(() => {
          downloads = new Downloads();
      });
+
+     after(()=>{
+        sinon.restore();
+     })
  
      describe('getDurationOfGetRequest', () => {
          it('should return -1 on failure of GET request', async () => {
