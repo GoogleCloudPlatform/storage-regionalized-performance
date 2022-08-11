@@ -19,39 +19,28 @@ import { Uploads } from '../src/backend/uploads';
 import * as sinon from 'sinon';
 import axios from 'axios';
 import { describe, it } from 'mocha';
+import { ERR_MSG_INVALID_BUCKET, ERR_MSG_INVALID_FILE, FILE_CONTENTS_2MIB, fakePerformanceNow } from './common.js';
 
-import { ERR_MSG_INVALID_BUCKET, ERR_MSG_INVALID_FILE, FILE_CONTENTS_2MIB } from './common.js';
+const SUCCESSFUL_REQUEST = 'Successful Request!';
+const ERR_MSG_AXIOS_FAILURE = 'Axios Request Failed';
+const ERR_MSG_FAILED_TO_REACH_SERVER = 'Failed to reach server to get signedURL';
 
-async function FakeAxiosGetSuccess(axiosOptions) {
+// Function that simulates success of an axios PUT or GET request
+async function fakeAxiosSuccess() {
     return {
-        data: 'http://www.fakeurl.com/'
-    };
-}
-
-async function FakeAxiosGetFailure(axiosOptions) {
-    throw new Error('Axios Get Request Failed');
-}
-
-async function FakeAxiosPutFailure(url, data, axiosOptions) {
-    throw new Error('Axios Put Request Failed');
-}
-
-async function FakeAxiosPutSuccess(url, data, axiosOptions) {
-    return {
-        data: 'Successful Put Request!'
+        data: SUCCESSFUL_REQUEST
     }
 }
 
-function fakePerformanceNow() {
-    return 1;
+// Function that simulates failure of an axios PUT or GET request
+async function fakeAxiosFailure() {
+    throw new Error(ERR_MSG_AXIOS_FAILURE);
 }
 
 describe('uploads', () => {
     let uploads;
     beforeEach(() => {
         uploads = new Uploads();
-        //@NOTE: Note all tests require this stub, take it out of the beforeEach()
-        sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
     });
 
     afterEach(() => {
@@ -60,21 +49,22 @@ describe('uploads', () => {
 
     describe('getSignedURL', async () => {
         it('should form the source of the signed URL correctly', async () => {
-            let spyAxiosGetMethod = sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
+            let spyAxiosGetMethod = sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
             const fileName = 'random_file_name';
             const bucketName = 'random_bucket_name';
 
             await uploads.getSignedURL(fileName, bucketName);
 
+            // NOTE: This test will change during deployment, when signedURL server is not hardcoded to localhost.
             assert.deepStrictEqual(spyAxiosGetMethod.args[0], [`http://localhost:3000/${bucketName}/${fileName}`]);
         });
 
         it('should throw an error when axios request fails', async () => {
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetFailure);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosFailure);
             const fileName = 'random_file_name';
             const bucketName = 'random_bucket_name';
 
-            await assert.rejects(uploads.getSignedURL(fileName, bucketName), { message: `Failed to reach server to get signedURL: Error: Axios Get Request Failed` });
+            await assert.rejects(uploads.getSignedURL(fileName, bucketName), { message: `${ERR_MSG_FAILED_TO_REACH_SERVER}: Error: ${ERR_MSG_AXIOS_FAILURE}` });
         });
     });
 
@@ -94,9 +84,11 @@ describe('uploads', () => {
             await assert.rejects(uploads.getDurationOfUpload(fileName, bucketName), { message: ERR_MSG_INVALID_FILE });
         });
 
+        // uploads.getDurationOfUpload defaults elapsed time to -1 in failure. This is divided by 1000
+        // to convert from millisecs to seconds. -1/1000 = -0.001.
         it('should return -0.001 if PUT request fails', async () => {
-            sinon.stub(axios, 'put').callsFake(FakeAxiosPutFailure);
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
+            sinon.stub(axios, 'put').callsFake(fakeAxiosFailure);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
 
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
@@ -107,8 +99,8 @@ describe('uploads', () => {
         });
 
         it('should form axiosOptions correctly', async () => {
-            let spyAxiosPutMethod = sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
+            let spyAxiosPutMethod = sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
 
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
@@ -116,7 +108,7 @@ describe('uploads', () => {
             await uploads.getDurationOfUpload(fileName, bucketName)
 
             const expectedArgs = [
-                'http://www.fakeurl.com/',
+                SUCCESSFUL_REQUEST,
                 FILE_CONTENTS_2MIB,
                 {
                     headers: {
@@ -127,14 +119,15 @@ describe('uploads', () => {
                     maxBodyLength: Infinity,
                     maxContentLength: Infinity
                 }
-            ]
+            ];
 
             assert.deepStrictEqual(spyAxiosPutMethod.args[0], expectedArgs);
         });
 
         it('should return 0 on success', async () => {
-            sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
+            sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
+            sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
 
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
@@ -145,13 +138,13 @@ describe('uploads', () => {
         });
 
         it('should throw error when Get request for signed URL fails', async () => {
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetFailure);
-            sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosFailure);
+            sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
 
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            await assert.rejects(uploads.getDurationOfUpload(fileName, bucketName), { message: 'Failed to reach server to get signedURL: Error: Axios Get Request Failed' });
+            await assert.rejects(uploads.getDurationOfUpload(fileName, bucketName), { message: `${ERR_MSG_FAILED_TO_REACH_SERVER}: Error: ${ERR_MSG_AXIOS_FAILURE}` });
         });
     });
 
@@ -171,8 +164,8 @@ describe('uploads', () => {
         });
 
         it('should return an Array of an Object with bad values if PUT request fails', async () => {
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
-            sinon.stub(axios, 'put').callsFake(FakeAxiosPutFailure);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
+            sinon.stub(axios, 'put').callsFake(fakeAxiosFailure);
 
             let expected = [
                 {
@@ -195,19 +188,21 @@ describe('uploads', () => {
         });
 
         it('should throw error when request for signed URL fails', async () => {
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetFailure);
-            sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosFailure);
+            sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
 
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            await assert.rejects(uploads.benchmarkSingleUpload(fileName, bucketName), { message: 'Failed to reach server to get signedURL: Error: Axios Get Request Failed' });
+            await assert.rejects(uploads.benchmarkSingleUpload(fileName, bucketName), { message: `${ERR_MSG_FAILED_TO_REACH_SERVER}: Error: ${ERR_MSG_AXIOS_FAILURE}` });
         });
 
         it('should return an Array of an Object on success', async () => {
-            sinon.stub(axios, 'get').callsFake(FakeAxiosGetSuccess);
-            sinon.stub(axios, 'put').callsFake(FakeAxiosPutSuccess);
+            sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
+            sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
+            sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
 
+            // SpeedBps and SpeedMiBps are set to 'Infinity' because of the division by 0. 
             let expected = [
                 {
                     bucketName: 'us-west1',

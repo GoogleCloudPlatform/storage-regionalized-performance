@@ -104,8 +104,8 @@ export class Uploads {
             await axios.put(url, FILE_CONTENTS[fileName], axiosOptions)
             timeTakenMilliSeconds = performance.now() - start;
         } catch (e) {
-            // Error is logged without further handling for now - this will be extended with retries/other handling in the future.
-            // console.error(e);
+            // Error caught without further handling for now - this will be extended with retries/other handling in the future.
+            // In case of an error, the final result currently renders 'bad' values (e.x. timeTaken is negative)
         }
 
         return timeTakenMilliSeconds / 1000;
