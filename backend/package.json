@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "c8 mocha test --require @babel/register"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "core-js": "^3.8.3",
+    "gts": "^3.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.18.6",
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@babel/preset-env": "^7.18.6",
+    "@babel/register": "^7.18.6",
+    "c8": "^7.11.3",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "gts": "^3.1.0",
+    "mocha": "^10.0.0",
+    "sinon": "^14.0.0"
+  }
+}
