@@ -2,7 +2,8 @@
 */node_modules
 */dist
 */package-lock.json
-*/coverage
+package-lock.json
+node_modules
 
 # local env files
 .env.local
@@ -25,3 +26,5 @@ pnpm-debug.log*
 
 # Test Results
 */test/coverage
+coverage
+*/coverage
