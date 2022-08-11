@@ -23,7 +23,7 @@ import { ERR_MSG_INVALID_BUCKET, ERR_MSG_INVALID_FILE, FILE_CONTENTS_2MIB, fakeP
 
 const SUCCESSFUL_REQUEST = 'Successful Request!';
 const ERR_MSG_AXIOS_FAILURE = 'Axios Request Failed';
-const ERR_MSG_FAILED_TO_REACH_SERVER = 'Failed to reach server to get signedURL';
+const ERR_MSG_FAILED_TO_REACH_SERVER = `Failed to reach server to get signedURL: Error: ${ERR_MSG_AXIOS_FAILURE}`;
 
 // Function that simulates success of an axios PUT or GET request
 async function fakeAxiosSuccess() {
@@ -49,7 +49,7 @@ describe('uploads', () => {
 
     describe('getSignedURL', async () => {
         it('should form the source of the signed URL correctly', async () => {
-            let spyAxiosGetMethod = sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
+            const spyAxiosGetMethod = sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
             const fileName = 'random_file_name';
             const bucketName = 'random_bucket_name';
 
@@ -64,7 +64,7 @@ describe('uploads', () => {
             const fileName = 'random_file_name';
             const bucketName = 'random_bucket_name';
 
-            await assert.rejects(uploads.getSignedURL(fileName, bucketName), { message: `${ERR_MSG_FAILED_TO_REACH_SERVER}: Error: ${ERR_MSG_AXIOS_FAILURE}` });
+            await assert.rejects(uploads.getSignedURL(fileName, bucketName), { message: ERR_MSG_FAILED_TO_REACH_SERVER });
         });
     });
 
@@ -93,13 +93,13 @@ describe('uploads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            let result = await uploads.getDurationOfUpload(fileName, bucketName);
+            const result = await uploads.getDurationOfUpload(fileName, bucketName);
 
             assert.deepStrictEqual(result, -0.001);
         });
 
         it('should form axiosOptions correctly', async () => {
-            let spyAxiosPutMethod = sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
+            const spyAxiosPutMethod = sinon.stub(axios, 'put').callsFake(fakeAxiosSuccess);
             sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
 
             const fileName = '2mib.txt';
@@ -144,7 +144,7 @@ describe('uploads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            await assert.rejects(uploads.getDurationOfUpload(fileName, bucketName), { message: `${ERR_MSG_FAILED_TO_REACH_SERVER}: Error: ${ERR_MSG_AXIOS_FAILURE}` });
+            await assert.rejects(uploads.getDurationOfUpload(fileName, bucketName), { message: ERR_MSG_FAILED_TO_REACH_SERVER });
         });
     });
 
@@ -167,7 +167,7 @@ describe('uploads', () => {
             sinon.stub(axios, 'get').callsFake(fakeAxiosSuccess);
             sinon.stub(axios, 'put').callsFake(fakeAxiosFailure);
 
-            let expected = [
+            const expected = [
                 {
                     bucketName: 'us-west1',
                     location: 'Oregon',
@@ -182,7 +182,7 @@ describe('uploads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            let actual = await uploads.benchmarkSingleUpload(fileName, bucketName);
+            const actual = await uploads.benchmarkSingleUpload(fileName, bucketName);
 
             assert.deepStrictEqual(actual, expected);
         });
@@ -194,7 +194,7 @@ describe('uploads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            await assert.rejects(uploads.benchmarkSingleUpload(fileName, bucketName), { message: `${ERR_MSG_FAILED_TO_REACH_SERVER}: Error: ${ERR_MSG_AXIOS_FAILURE}` });
+            await assert.rejects(uploads.benchmarkSingleUpload(fileName, bucketName), { message: ERR_MSG_FAILED_TO_REACH_SERVER });
         });
 
         it('should return an Array of an Object on success', async () => {
@@ -203,7 +203,7 @@ describe('uploads', () => {
             sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
 
             // SpeedBps and SpeedMiBps are set to 'Infinity' because of the division by 0. 
-            let expected = [
+            const expected = [
                 {
                     bucketName: 'us-west1',
                     location: 'Oregon',
@@ -218,7 +218,7 @@ describe('uploads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            let actual = await uploads.benchmarkSingleUpload(fileName, bucketName);
+            const actual = await uploads.benchmarkSingleUpload(fileName, bucketName);
 
             assert.deepStrictEqual(actual, expected);
         });

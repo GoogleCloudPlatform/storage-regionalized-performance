@@ -18,13 +18,16 @@
  * Error message returned when a method is called with an invalid filename
  * @const {string}
  */
-export const ERR_MSG_INVALID_FILE = `Invalid File Name: 'random_file_name'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`;
+export const ERR_MSG_INVALID_FILE = `Invalid File Name: 'random_file_name'.` + 
+    ` File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`;
 
 /**
  * Error message returned when a method is called with an invalid bucket name
  * @const {string}
  */
-export const ERR_MSG_INVALID_BUCKET = `Invalid Bucket Name: 'random_bucket_name'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`;
+export const ERR_MSG_INVALID_BUCKET = `Invalid Bucket Name: 'random_bucket_name'.` + 
+    ` Bucket must be a supported Google Cloud Storage Region Name.` + 
+    ` View https://cloud.google.com/storage/docs/locations for more information.`;
 
 /**
  * Contents of the smallest (2mib) filesize used for uploads/downloads

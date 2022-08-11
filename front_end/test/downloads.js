@@ -38,7 +38,7 @@ async function fakeGetDurationOfGetRequest() {
 describe('downloads', () => {
     let downloads;
     sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
-    let spyAxiosGetRequest = sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
+    const spyAxiosGetRequest = sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
 
     beforeEach(() => {
         downloads = new Downloads();
@@ -85,7 +85,7 @@ describe('downloads', () => {
             const bucketName = 'us-west1';
             const fileName = '2mib.txt';
 
-            let result = await downloads.getDurationInSeconds(fileName, bucketName);
+            const result = await downloads.getDurationInSeconds(fileName, bucketName);
             assert.deepStrictEqual(result, -0.001);
 
             downloads.getDurationOfGetRequest.restore();
@@ -103,7 +103,7 @@ describe('downloads', () => {
             const bucketName = 'us-west1';
             await downloads.getDurationInSeconds(fileName, bucketName);
 
-            let calledWith = spyAxiosGetRequest.args
+            const calledWith = spyAxiosGetRequest.args
             assert.deepStrictEqual(calledWith[calledWith.length - 1], [`https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`]);
         });
     });
@@ -115,7 +115,7 @@ describe('downloads', () => {
             const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
             // SpeedBps and SpeedMiBps are set to 'Infinity' because of the division by 0. 
-            let expected = [{
+            const expected = [{
                 'bucketName': 'us-west1',
                 'location': 'Oregon',
                 'fileName': '2mib.txt',
@@ -148,9 +148,9 @@ describe('downloads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            let result = await downloads.benchmarkSingleDownload(fileName, bucketName);
+            const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
-            let expected = [{
+            const expected = [{
                 'bucketName': 'us-west1',
                 'fileName': '2mib.txt',
                 'fileSizeBytes': '2097152',
