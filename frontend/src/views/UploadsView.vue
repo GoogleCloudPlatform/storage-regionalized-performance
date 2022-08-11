@@ -34,8 +34,8 @@
 <script>
 import ResultsTable from '@/components/ResultsTable';
 import ProgressBar from '../components/ProgressBar';
-import { Uploads } from '@/backend/uploads';
-import { REGIONS_MAP, FILESIZES_NAMES } from '@/backend/common';
+import { Uploads } from '../../../backend/uploads';
+import { REGIONS_MAP, FILESIZES_NAMES } from '../../../backend/common';
 
 let currentFileSize = FILESIZES_NAMES.small;
 let progressBarCount = 0;
