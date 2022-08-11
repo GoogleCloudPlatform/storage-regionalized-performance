@@ -22,8 +22,6 @@ import axios from 'axios';
  * Measure time to download files from a bucket to memory and get relevant benchmarks.
  */
 export class Downloads {
-    _builtURL;
-
     /**
      * Measures time (in milliseconds) to download a file from a bucket to memory as specified by the input URL.
      * 
@@ -32,7 +30,6 @@ export class Downloads {
      * @returns {number} -1 if download fails - so that a sequence of benchmarks can continue running even if one fails. 
      */
     async getDurationOfGetRequest(URL) {
-        this._builtURL = URL;
         try {
             const start = performance.now();
             await axios.get(URL);

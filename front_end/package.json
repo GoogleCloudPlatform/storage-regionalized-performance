@@ -17,21 +17,21 @@
     "vue-router": "^4.0.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
     "@babel/cli": "^7.18.6",
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
     "@babel/preset-env": "^7.18.6",
     "@babel/register": "^7.18.6",
-    "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "@vue/test-utils": "^2.0.0-0",
+    "c8": "^7.11.3",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "gts": "^3.1.0",
-    "sinon": "^14.0.0",
-    "c8": "^7.11.3",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "sinon": "^14.0.0"
   }
 }

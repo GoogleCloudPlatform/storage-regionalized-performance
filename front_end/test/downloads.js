@@ -19,6 +19,8 @@ import { Downloads } from '../src/backend/downloads.js';
 import * as sinon from 'sinon';
 import axios from 'axios';
 import { describe, it } from 'mocha';
+import { ERR_MSG_INVALID_BUCKET, ERR_MSG_INVALID_FILE, fakePerformanceNow } from './common.js';
+
 
 async function fakeAxiosGet(URL) {
     // If the URL does not match https://storage.googleapis.com/${bucketName}/${fileName}, throw an error.
@@ -28,26 +30,23 @@ async function fakeAxiosGet(URL) {
     }
 }
 
-function fakeDateNow() {
-    return 1;
-}
-
 // Function that simulates failure of axios in Downloads.getDurationOfGetRequest()
 async function fakeGetDurationOfGetRequest() {
     return -1;
 }
 
-const ERR_MSG_INVALID_FILE = `Invalid File Name: 'random_file_name'. File names must be any of "2mib.txt", "64mib.txt" or "256mib.txt"`;
-const ERR_MSG_INVALID_BUCKET = `Invalid Bucket Name: 'random_bucket_name'. Bucket must be a supported Google Cloud Storage Region Name. View https://cloud.google.com/storage/docs/locations for more information.`;
-
 describe('downloads', () => {
     let downloads;
-    sinon.stub(performance, 'now').callsFake(fakeDateNow);
-    sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
-    
+    sinon.stub(performance, 'now').callsFake(fakePerformanceNow);
+    const spyAxiosGetRequest = sinon.stub(axios, 'get').callsFake(fakeAxiosGet);
+
     beforeEach(() => {
         downloads = new Downloads();
     });
+
+    after(() => {
+        sinon.restore();
+    })
 
     describe('getDurationOfGetRequest', () => {
         it('should return -1 on failure of GET request', async () => {
@@ -86,7 +85,7 @@ describe('downloads', () => {
             const bucketName = 'us-west1';
             const fileName = '2mib.txt';
 
-            let result = await downloads.getDurationInSeconds(fileName, bucketName);
+            const result = await downloads.getDurationInSeconds(fileName, bucketName);
             assert.deepStrictEqual(result, -0.001);
 
             downloads.getDurationOfGetRequest.restore();
@@ -103,7 +102,9 @@ describe('downloads', () => {
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
             await downloads.getDurationInSeconds(fileName, bucketName);
-            assert.deepStrictEqual(downloads._builtURL, `https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`);
+
+            const calledWith = spyAxiosGetRequest.args
+            assert.deepStrictEqual(calledWith[calledWith.length - 1], [`https://storage.googleapis.com/gcsrbpa-us-west1/2mib.txt`]);
         });
     });
 
@@ -114,7 +115,7 @@ describe('downloads', () => {
             const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
             // SpeedBps and SpeedMiBps are set to 'Infinity' because of the division by 0. 
-            let expected = [{
+            const expected = [{
                 'bucketName': 'us-west1',
                 'location': 'Oregon',
                 'fileName': '2mib.txt',
@@ -143,13 +144,13 @@ describe('downloads', () => {
 
         it('should return an Array of an Object with bad values if GET request fails', async () => {
             sinon.stub(downloads, 'getDurationOfGetRequest').callsFake(fakeGetDurationOfGetRequest)
-            
+
             const fileName = '2mib.txt';
             const bucketName = 'us-west1';
 
-            let result = await downloads.benchmarkSingleDownload(fileName, bucketName);
+            const result = await downloads.benchmarkSingleDownload(fileName, bucketName);
 
-            let expected = [{
+            const expected = [{
                 'bucketName': 'us-west1',
                 'fileName': '2mib.txt',
                 'fileSizeBytes': '2097152',

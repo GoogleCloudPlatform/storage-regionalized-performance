@@ -52,12 +52,12 @@ export class Uploads {
         // The signed URL Source is set to localhost now, but will either use env variables or another website during deployment
         const signedUrlSource = `http://localhost:3000/${bucketName}/${fileName}`;
 
-        const axiosOptions = {
-            method: 'GET',
-            url: signedUrlSource,
+        let response;
+        try {
+            response = await axios.get(signedUrlSource);
+        } catch (e) {
+            throw new Error(`Failed to reach server to get signedURL: ${e}`);
         }
-
-        const response = await axios(axiosOptions);
 
         return response.data;
     }
@@ -86,19 +86,14 @@ export class Uploads {
 
         const fullBucketName = `gcsrbpa-upload-${bucketName}`;
 
-        const headers = {
-            'Content-Type': 'text/plain',
-            'Content-Md5': MD5_SUMS[fileName],
-            'x-goog-content-length-range': `${FILESIZE_BYTES[fileName]},${FILESIZE_BYTES[fileName]}`,
-        };
-
         const url = await this.getSignedURL(fileName, fullBucketName);
 
         const axiosOptions = {
-            method: 'PUT',
-            url: url,
-            data: FILE_CONTENTS[fileName],
-            headers: headers,
+            headers: {
+                'Content-Type': 'text/plain',
+                'Content-Md5': MD5_SUMS[fileName],
+                'x-goog-content-length-range': `${FILESIZE_BYTES[fileName]},${FILESIZE_BYTES[fileName]}`,
+            },
             maxContentLength: Infinity,
             maxBodyLength: Infinity
         };
@@ -106,11 +101,11 @@ export class Uploads {
         let timeTakenMilliSeconds = DEFAULT_TIME_TAKEN;
         try {
             let start = performance.now();
-            await axios(axiosOptions)
+            await axios.put(url, FILE_CONTENTS[fileName], axiosOptions)
             timeTakenMilliSeconds = performance.now() - start;
         } catch (e) {
-            // Error is logged without further handling for now - this will be extended with retries/other handling in the future.
-            console.log(e);
+            // Error caught without further handling for now - this will be extended with retries/other handling in the future.
+            // In case of an error, the final result currently renders 'bad' values (e.x. timeTaken is negative)
         }
 
         return timeTakenMilliSeconds / 1000;
