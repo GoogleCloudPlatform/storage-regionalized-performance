@@ -15,46 +15,46 @@
  */
 
 /**
- * All supported Google Cloud Storage single bucket regions and their 
+ * All supported Google Cloud Storage single bucket regions and their
  * associated Locations
  * See {@link https://cloud.google.com/storage/docs/locations}
  * @enum {string}
  */
 export const REGIONS_MAP = Object.freeze({
-    'northamerica-northeast1': 'Montréal',
-    'northamerica-northeast2': 'Toronto',
-    'us-central1': 'Iowa',
-    'us-east1': 'South Carolina',
-    'us-east4': 'Northern Virginia',
-    'us-east5': 'Columbus',
-    'us-south1': 'Dallas',
-    'us-west1': 'Oregon',
-    'us-west2': 'Los Angeles',
-    'us-west3': 'Salt Lake City',
-    'us-west4': 'Las Vegas',
-    'southamerica-east1': 'São Paulo',
-    'southamerica-west1': 'Santiago',
-    'europe-central2': 'Warsaw',
-    'europe-north1': 'Finland',
-    'europe-southwest1': 'Madrid',
-    'europe-west1': 'Belgium',
-    'europe-west2': 'London',
-    'europe-west3': 'Frankfurt',
-    'europe-west4': 'Netherlands',
-    'europe-west6': 'Zürich',
-    'europe-west8': 'Milan',
-    'europe-west9': 'Paris',
-    'asia-east1': 'Taiwan',
-    'asia-east2': 'Hong Kong',
-    'asia-northeast1': 'Tokyo',
-    'asia-northeast2': 'Osaka',
-    'asia-northeast3': 'Seoul',
-    'asia-south1': 'Mumbai',
-    'asia-south2': 'Delhi',
-    'asia-southeast1': 'Singapore',
-    'asia-southeast2': 'Jakarta',
-    'australia-southeast1': 'Sydney',
-    'australia-southeast2': 'Melbourne'
+  'northamerica-northeast1': 'Montréal',
+  'northamerica-northeast2': 'Toronto',
+  'us-central1': 'Iowa',
+  'us-east1': 'South Carolina',
+  'us-east4': 'Northern Virginia',
+  'us-east5': 'Columbus',
+  'us-south1': 'Dallas',
+  'us-west1': 'Oregon',
+  'us-west2': 'Los Angeles',
+  'us-west3': 'Salt Lake City',
+  'us-west4': 'Las Vegas',
+  'southamerica-east1': 'São Paulo',
+  'southamerica-west1': 'Santiago',
+  'europe-central2': 'Warsaw',
+  'europe-north1': 'Finland',
+  'europe-southwest1': 'Madrid',
+  'europe-west1': 'Belgium',
+  'europe-west2': 'London',
+  'europe-west3': 'Frankfurt',
+  'europe-west4': 'Netherlands',
+  'europe-west6': 'Zürich',
+  'europe-west8': 'Milan',
+  'europe-west9': 'Paris',
+  'asia-east1': 'Taiwan',
+  'asia-east2': 'Hong Kong',
+  'asia-northeast1': 'Tokyo',
+  'asia-northeast2': 'Osaka',
+  'asia-northeast3': 'Seoul',
+  'asia-south1': 'Mumbai',
+  'asia-south2': 'Delhi',
+  'asia-southeast1': 'Singapore',
+  'asia-southeast2': 'Jakarta',
+  'australia-southeast1': 'Sydney',
+  'australia-southeast2': 'Melbourne',
 });
 
 /**
@@ -62,9 +62,9 @@ export const REGIONS_MAP = Object.freeze({
  * @enum {string}
  */
 export const FILESIZES_NAMES = Object.freeze({
-    small: '2mib.txt',
-    medium: '64mib.txt',
-    large: '256mib.txt'
+  small: '2mib.txt',
+  medium: '64mib.txt',
+  large: '256mib.txt',
 });
 
 /**
@@ -72,9 +72,9 @@ export const FILESIZES_NAMES = Object.freeze({
  * @enum {number}
  */
 export const FILESIZE_BYTES = Object.freeze({
-    [FILESIZES_NAMES.small]: 2097152,
-    [FILESIZES_NAMES.medium]: 67108864,
-    [FILESIZES_NAMES.large]: 268435456
+  [FILESIZES_NAMES.small]: 2097152,
+  [FILESIZES_NAMES.medium]: 67108864,
+  [FILESIZES_NAMES.large]: 268435456,
 });
 
 /**
@@ -82,9 +82,9 @@ export const FILESIZE_BYTES = Object.freeze({
  * @enum {number}
  */
 export const FILESIZE_MIB = Object.freeze({
-    [FILESIZES_NAMES.small]: 2,
-    [FILESIZES_NAMES.medium]: 64,
-    [FILESIZES_NAMES.large]: 256
+  [FILESIZES_NAMES.small]: 2,
+  [FILESIZES_NAMES.medium]: 64,
+  [FILESIZES_NAMES.large]: 256,
 });
 
 /**
