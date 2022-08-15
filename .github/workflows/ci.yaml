@@ -4,9 +4,6 @@ on:
       - main
   pull_request:
 name: ci
-defaults:
-  run:
-    working-directory: front_end/
 jobs:
   test:
     runs-on: ubuntu-latest
