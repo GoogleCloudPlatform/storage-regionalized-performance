@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "compile": "vue-cli-service build",
     "test": "c8 mocha test --require @babel/register",
-    "lint": "vue-cli-service lint",
+    "lint": "gts check",
     "fix": "gts fix"
   },
   "dependencies": {
