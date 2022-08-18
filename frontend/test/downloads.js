@@ -18,13 +18,13 @@ import * as assert from 'assert';
 import { Downloads } from '../src/backend/downloads.js';
 import * as sinon from 'sinon';
 import axios from 'axios';
-import { describe, it } from 'mocha';
+import { describe, it, beforeEach, after } from 'mocha';
 import { ERR_MSG_INVALID_BUCKET, ERR_MSG_INVALID_FILE, fakePerformanceNow } from './common.js';
 
 
 async function fakeAxiosGet(URL) {
     // If the URL does not match https://storage.googleapis.com/${bucketName}/${fileName}, throw an error.
-    const regexURL = 'https:\/\/storage\.googleapis\.com\/([a-zA-Z]+(-[a-zA-Z]+)+)[0-9]+\/[0-9]+([a-zA-Z]+(\.[a-zA-Z]+)+)';
+    const regexURL = 'https://storage.googleapis.com/([a-zA-Z]+(-[a-zA-Z]+)+)[0-9]+/[0-9]+([a-zA-Z]+(.[a-zA-Z]+)+)';
     if (!URL.match(regexURL)) {
         throw new Error('URL is not well defined');
     }
