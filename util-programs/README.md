@@ -1,0 +1,1 @@
+This folder contains programs used to configure buckets for both uploads and downloads. It also contains scratch programs written to explore backend logic. 
